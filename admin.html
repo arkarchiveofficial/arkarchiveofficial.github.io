@@ -6,29 +6,25 @@
     <title>ARK ADMIN | Global Control Panel</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/otplib/12.0.1/otplib-browser.all.min.js"></script>
 
     <style>
         :root { --cyan: #00BFFF; --pink: #FF1493; --dark: #1a1a1a; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
         
-        /* Login UI Styles */
-        #login-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--dark); display: flex; justify-content: center; align-items: center; z-index: 9999;
-        }
-        .login-box {
-            background: white; padding: 30px; border-radius: 15px; width: 320px; text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-        }
-        .login-box h2 { color: var(--dark); margin-bottom: 20px; font-size: 22px; }
-        .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .login-box button { width: 100%; padding: 12px; background: var(--cyan); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        #login-error { color: red; font-size: 13px; margin-top: 10px; display: none; }
+        /* Login UI */
+        .login-container { max-width: 400px; margin: 100px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; border-top: 5px solid var(--cyan); }
+        .login-container input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        .btn-login { width: 100%; padding: 12px; background: var(--dark); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
 
-        /* Admin Content Styles (Your Original CSS) */
-        .container { max-width: 1000px; margin: 0 auto; }
+        /* Hidden 2FA Box Style */
+        #two-factor-box { display: none; }
+        .otp-input { text-align: center; font-size: 24px; letter-spacing: 5px; font-weight: bold; border: 2px solid var(--cyan) !important; color: var(--pink); }
+
+        /* Admin UI */
+        .container { max-width: 1000px; margin: 0 auto; display: none; }
         header { background: var(--dark); color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
         .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 25px; }
         h2 { border-left: 5px solid var(--cyan); padding-left: 15px; margin-bottom: 20px; color: #333; font-size: 20px; }
@@ -39,77 +35,75 @@
         .btn-add { background: var(--pink); color: white; margin-top: 10px; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
         th, td { padding: 12px; border: 1px solid #eee; text-align: left; font-size: 14px; }
-        th { background: #f8f9fa; }
-        .req-card { border-bottom: 1px solid #eee; padding: 10px 0; display: flex; justify-content: space-between; }
         .delete-btn { color: red; cursor: pointer; font-weight: bold; }
-        .logout-btn { background: #444; color: white; padding: 8px 15px; font-size: 12px; border-radius: 5px; }
+        .logout-btn { background: #ef4444; color: white; font-size: 12px; }
     </style>
 </head>
-
 <body>
 
-<div id="login-screen">
-    <div class="login-box">
-        <h2>ARK Admin Login</h2>
+<div id="login-section" class="login-container">
+    <h2 id="log-head" style="border:none; padding:0;">ARK Admin Access</h2>
+    
+    <div id="first-auth">
         <input type="email" id="admin-email" placeholder="Email Address">
-        <input type="password" id="admin-pass" placeholder="Password">
-        <button onclick="handleLogin()">Access Admin Panel</button>
-        <p id="login-error">Invalid Credentials!</p>
+        <input type="password" id="admin-password" placeholder="Password">
+        <button class="btn-login" onclick="handleLogin()">SECURE LOGIN</button>
     </div>
+
+    <div id="two-factor-box">
+        <p style="font-size: 12px; color: #666;">Enter 6-digit Authenticator Code</p>
+        <input type="text" id="otp-code" class="otp-input" placeholder="000000" maxlength="6">
+        <button class="btn-login" style="background: var(--cyan);" onclick="verifyOTP()">VERIFY & PROCEED</button>
+    </div>
+
+    <p id="login-error" style="color:red; font-size:12px; margin-top:10px;"></p>
 </div>
 
-<div id="admin-content" style="display:none;">
-    <div class="container">
-        <header>
-            <h1>ARK ARCHIVE ADMIN</h1>
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <div id="status-indicator" style="color: #00ff00;">● Secure Session</div>
-                <button class="logout-btn" onclick="handleLogout()">Logout</button>
-            </div>
-        </header>
+<div id="admin-content" class="container">
+    <header>
+        <h1>ARK ARCHIVE ADMIN</h1>
+        <button class="logout-btn" onclick="handleLogout()">LOGOUT</button>
+    </header>
 
-        <div class="card">
-            <h2>Section 1: Live Stats Control</h2>
-            <div class="grid-3">
-                <div><label>Collected ($)</label><input type="number" id="input-collected"></div>
-                <div><label>Trees Bought</label><input type="number" id="input-bought"></div>
-                <div><label>Handed Over</label><input type="number" id="input-delivered"></div>
-            </div>
-            <button class="btn-save" onclick="updateStats()">UPDATE LIVE STATS</button>
+    <div class="card">
+        <h2>Section 1: Live Stats Control</h2>
+        <div class="grid-3">
+            <div><label>Collected ($)</label><input type="number" id="input-collected"></div>
+            <div><label>Trees Bought</label><input type="number" id="input-bought"></div>
+            <div><label>Handed Over</label><input type="number" id="input-delivered"></div>
         </div>
+        <button class="btn-save" onclick="updateStats()">UPDATE LIVE STATS</button>
+    </div>
 
-        <div class="card">
-            <h2>Section 2: Mission Gallery (Image Links)</h2>
-            <input type="text" id="gallery-url" placeholder="Paste Image URL here...">
-            <button class="btn-add" onclick="addToGallery()">ADD TO GALLERY</button>
-            <div id="gallery-list" style="margin-top:15px; display: flex; gap: 10px; flex-wrap: wrap;"></div>
-        </div>
+    <div class="card">
+        <h2>Section 2: Mission Gallery</h2>
+        <input type="text" id="gallery-url" placeholder="Paste Image URL here...">
+        <button class="btn-add" onclick="addToGallery()">ADD TO GALLERY</button>
+        <div id="gallery-list" style="margin-top:15px; display: flex; gap: 10px; flex-wrap: wrap;"></div>
+    </div>
 
-        <div class="card">
-            <h2>Section 3: Add Donor to Legacy Archive</h2>
-            <div class="grid-3">
-                <input type="text" id="donor-name" placeholder="Donor Name">
-                <input type="text" id="donor-photo" placeholder="Photo URL">
-                <input type="text" id="donor-link" placeholder="Social/Web Link">
-            </div>
-            <input type="number" id="donor-trees" placeholder="Number of Trees">
-            <button class="btn-add" style="background: var(--cyan);" onclick="addToArchive()">ADD TO LEGACY GRID</button>
-            
-            <table id="archive-table">
-                <thead><tr><th>Name</th><th>Trees</th><th>Action</th></tr></thead>
-                <tbody></tbody>
-            </table>
+    <div class="card">
+        <h2>Section 3: Legacy Archive</h2>
+        <div class="grid-3">
+            <input type="text" id="donor-name" placeholder="Donor Name">
+            <input type="text" id="donor-photo" placeholder="Photo URL">
+            <input type="text" id="donor-link" placeholder="Social Link">
         </div>
+        <input type="number" id="donor-trees" placeholder="Number of Trees">
+        <button class="btn-add" style="background: var(--cyan);" onclick="addToArchive()">ADD TO LEGACY GRID</button>
+        <table id="archive-table">
+            <thead><tr><th>Name</th><th>Trees</th><th>Action</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
 
-        <div class="card">
-            <h2>Section 4: Recent Donation Requests</h2>
-            <div id="request-list"><p>Loading requests...</p></div>
-        </div>
+    <div class="card">
+        <h2>Section 4: Recent Donation Requests</h2>
+        <div id="request-list"><p>Loading requests...</p></div>
     </div>
 </div>
 
 <script>
-    // Firebase Config
     const firebaseConfig = {
         apiKey: "AIzaSyCAdnfu2R82xbC7H85n_9mvQBE58X3TjbA",
         authDomain: "the-5k-elite-legacy.firebaseapp.com",
@@ -120,44 +114,63 @@
         appId: "1:440824313752:web:2c93344dcfe2ba0a4c5ded"
     };
     firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
     const db = firebase.database();
+    const auth = firebase.auth();
 
-    // --- Authentication Logic ---
+    // --- Premium Obfuscated 2FA Key Layer ---
+    const _0x1f21 = ['\x53\x4c\x4a\x53\x56\x31\x59\x7a\x52\x46\x50\x45\x48\x50\x4b\x4c\x4d\x31\x42\x59\x55\x51\x3d\x3d'];
+    (function(_0x192,_0x5f2){const _0x464=function(_0x306){while(--_0x306){_0x192['push'](_0x192['shift']());}};_0x464(++_0x5f2);}(_0x1f21,0x1a4));
+    const _0x4649=function(_0x192,_0x5f2){_0x192=_0x192-0x0;let _0x278=_0x1f21[_0x192];return _0x278;};
+    const secret = atob(_0x4649('0x0'));
+
+    // Authentication Logic
     function handleLogin() {
         const email = document.getElementById('admin-email').value;
-        const pass = document.getElementById('admin-pass').value;
-        const errorMsg = document.getElementById('login-error');
+        const password = document.getElementById('admin-password').value;
+        
+        // নির্দিষ্ট ইমেইল এবং পাসওয়ার্ড চেক
+        if(email === "zoomlink34@gmail.com" && password === "KAWSARahmed22@@") {
+            auth.signInWithEmailAndPassword(email, password)
+                .then(() => {
+                    document.getElementById('first-auth').style.display = 'none';
+                    document.getElementById('two-factor-box').style.display = 'block';
+                    document.getElementById('log-head').innerText = "2FA Verification";
+                    document.getElementById('login-error').innerText = "";
+                })
+                .catch(err => document.getElementById('login-error').innerText = "System Error: " + err.message);
+        } else {
+            document.getElementById('login-error').innerText = "Access Denied: Invalid Credentials.";
+        }
+    }
 
-        auth.signInWithEmailAndPassword(email, pass)
-            .catch(err => {
-                errorMsg.style.display = 'block';
-                console.error(err.message);
-            });
+    function verifyOTP() {
+        const code = document.getElementById('otp-code').value;
+        const isValid = otplib.authenticator.check(code, secret);
+
+        if (isValid) {
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('admin-content').style.display = 'block';
+            initApp();
+        } else {
+            document.getElementById('login-error').innerText = "Invalid 6-digit code. Verification failed.";
+        }
     }
 
     function handleLogout() {
-        auth.signOut();
+        auth.signOut().then(() => location.reload());
     }
 
-    // Auth State Observer
+    // Force Login on Page Refresh (Security)
     auth.onAuthStateChanged(user => {
-        const loginScreen = document.getElementById('login-screen');
-        const adminContent = document.getElementById('admin-content');
-
-        if (user && user.email === 'zoomlink34@gmail.com') {
-            loginScreen.style.display = 'none';
-            adminContent.style.display = 'block';
-            initApp(); // লগইন সফল হলে অ্যাপ লোড হবে
-        } else {
-            loginScreen.style.display = 'flex';
-            adminContent.style.display = 'none';
-        }
+        document.getElementById('login-section').style.display = 'block';
+        document.getElementById('admin-content').style.display = 'none';
+        document.getElementById('first-auth').style.display = 'block';
+        document.getElementById('two-factor-box').style.display = 'none';
+        document.getElementById('log-head').innerText = "ARK Admin Access";
     });
 
-    // --- Original Logic (Init inside Auth) ---
     function initApp() {
-        // Stats
+        // Original Logic
         db.ref('stats').on('value', snap => {
             const data = snap.val() || { collected: 0, bought: 0, delivered: 0 };
             document.getElementById('input-collected').value = data.collected;
@@ -165,19 +178,17 @@
             document.getElementById('input-delivered').value = data.delivered;
         });
 
-        // Gallery
         db.ref('gallery').on('value', snap => {
             const list = document.getElementById('gallery-list');
             list.innerHTML = '';
             snap.forEach(child => {
                 list.innerHTML += `<div style="position:relative">
-                    <img src="${child.val()}" width="80" height="60" style="border-radius:5px">
-                    <span class="delete-btn" style="position:absolute; top:0; right:0; background:white; padding: 0 4px;" onclick="deleteItem('gallery/${child.key}')">×</span>
+                    <img src="${child.val()}" width="80" height="60" style="border-radius:5px; object-fit:cover;">
+                    <span class="delete-btn" style="position:absolute; top:-5px; right:-5px; background:white; border-radius:50%; padding:2px 6px; font-size:10px;" onclick="deleteItem('gallery/${child.key}')">×</span>
                 </div>`;
             });
         });
 
-        // Archive
         db.ref('legacy_archive').on('value', snap => {
             const tbody = document.querySelector('#archive-table tbody');
             tbody.innerHTML = '';
@@ -191,39 +202,32 @@
             });
         });
 
-        // Requests
         db.ref('donation_requests').on('value', snap => {
             const reqList = document.getElementById('request-list');
             reqList.innerHTML = '';
             if(!snap.exists()) reqList.innerHTML = '<p>No requests found.</p>';
             snap.forEach(child => {
                 const r = child.val();
-                reqList.innerHTML += `
-                    <div class="req-card">
-                        <div>
-                            <strong>${r.name}</strong> wants to plant <strong>${r.qty} trees</strong>
-                            <br><small>${new Date(r.timestamp).toLocaleString()}</small>
-                        </div>
-                        <span class="delete-btn" onclick="deleteItem('donation_requests/${child.key}')">Complete/Remove</span>
-                    </div>`;
+                reqList.innerHTML += `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;">
+                    <span><strong>${r.name}</strong> - ${r.qty} trees</span>
+                    <span class="delete-btn" onclick="deleteItem('donation_requests/${child.key}')">Remove</span>
+                </div>`;
             });
         });
     }
 
-    // --- Original Functions ---
     function updateStats() {
         db.ref('stats').set({
-            collected: parseInt(document.getElementById('input-collected').value),
-            bought: parseInt(document.getElementById('input-bought').value),
-            delivered: parseInt(document.getElementById('input-delivered').value)
+            collected: parseInt(document.getElementById('input-collected').value) || 0,
+            bought: parseInt(document.getElementById('input-bought').value) || 0,
+            delivered: parseInt(document.getElementById('input-delivered').value) || 0
         }).then(() => alert("Stats Updated!"));
     }
 
     function addToGallery() {
         const url = document.getElementById('gallery-url').value;
         if(url) {
-            db.ref('gallery').push(url);
-            document.getElementById('gallery-url').value = '';
+            db.ref('gallery').push(url).then(() => document.getElementById('gallery-url').value = '');
         }
     }
 
@@ -233,8 +237,7 @@
         const link = document.getElementById('donor-link').value;
         const trees = document.getElementById('donor-trees').value;
         if(name) {
-            db.ref('legacy_archive').push({ name, photo, link, trees });
-            alert("Added to Archive!");
+            db.ref('legacy_archive').push({ name, photo, link, trees }).then(() => alert("Added!"));
         }
     }
 
