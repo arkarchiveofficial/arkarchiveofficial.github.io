@@ -7,23 +7,20 @@
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/otplib/12.0.1/otplib-browser.all.min.js"></script>
 
     <style>
         :root { --cyan: #00BFFF; --pink: #FF1493; --dark: #1a1a1a; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
         
-        /* Login UI */
-        .login-container { max-width: 400px; margin: 100px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; border-top: 5px solid var(--cyan); }
-        .login-container input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        .btn-login { width: 100%; padding: 12px; background: var(--dark); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        /* Direct 2FA Login UI */
+        .login-container { max-width: 350px; margin: 150px auto; background: white; padding: 40px 30px; border-radius: 15px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); text-align: center; border-bottom: 5px solid var(--pink); }
+        .login-container h2 { font-size: 18px; margin-bottom: 20px; color: var(--dark); letter-spacing: 1px; }
+        .otp-input { width: 100%; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 8px; border: 2px solid #eee; border-radius: 10px; margin-bottom: 20px; outline: none; transition: 0.3s; }
+        .otp-input:focus { border-color: var(--cyan); }
+        .btn-verify { width: 100%; padding: 14px; background: var(--dark); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
 
-        /* Hidden 2FA Box Style */
-        #two-factor-box { display: none; }
-        .otp-input { text-align: center; font-size: 24px; letter-spacing: 5px; font-weight: bold; border: 2px solid var(--cyan) !important; color: var(--pink); }
-
-        /* Admin UI */
+        /* Admin Content (Hidden by default) */
         .container { max-width: 1000px; margin: 0 auto; display: none; }
         header { background: var(--dark); color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
         .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 25px; }
@@ -37,32 +34,25 @@
         th, td { padding: 12px; border: 1px solid #eee; text-align: left; font-size: 14px; }
         .delete-btn { color: red; cursor: pointer; font-weight: bold; }
         .logout-btn { background: #ef4444; color: white; font-size: 12px; }
+
+        @media (max-width: 600px) { .grid-3 { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 
 <div id="login-section" class="login-container">
-    <h2 id="log-head" style="border:none; padding:0;">ARK Admin Access</h2>
-    
-    <div id="first-auth">
-        <input type="email" id="admin-email" placeholder="Email Address">
-        <input type="password" id="admin-password" placeholder="Password">
-        <button class="btn-login" onclick="handleLogin()">SECURE LOGIN</button>
-    </div>
-
-    <div id="two-factor-box">
-        <p style="font-size: 12px; color: #666;">Enter 6-digit Authenticator Code</p>
-        <input type="text" id="otp-code" class="otp-input" placeholder="000000" maxlength="6">
-        <button class="btn-login" style="background: var(--cyan);" onclick="verifyOTP()">VERIFY & PROCEED</button>
-    </div>
-
-    <p id="login-error" style="color:red; font-size:12px; margin-top:10px;"></p>
+    <div style="font-size: 40px; color: var(--cyan); margin-bottom: 10px;"><i class="fas fa-user-shield"></i></div>
+    <h2>ADMIN VERIFICATION</h2>
+    <p style="font-size: 12px; color: #888; margin-bottom: 20px;">Enter the 6-digit code from your app</p>
+    <input type="text" id="otp-code" class="otp-input" placeholder="000000" maxlength="6">
+    <button class="btn-verify" onclick="verifyAccess()">Verify & Enter</button>
+    <p id="login-error" style="color:red; font-size:12px; margin-top:15px; display:none;"></p>
 </div>
 
 <div id="admin-content" class="container">
     <header>
         <h1>ARK ARCHIVE ADMIN</h1>
-        <button class="logout-btn" onclick="handleLogout()">LOGOUT</button>
+        <button class="logout-btn" onclick="location.reload()">LOCK PANEL</button>
     </header>
 
     <div class="card">
@@ -103,6 +93,7 @@
     </div>
 </div>
 
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 <script>
     const firebaseConfig = {
         apiKey: "AIzaSyCAdnfu2R82xbC7H85n_9mvQBE58X3TjbA",
@@ -115,36 +106,18 @@
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    const auth = firebase.auth();
 
-    // --- Premium Obfuscated 2FA Key Layer ---
-    const _0x1f21 = ['\x53\x4c\x4a\x53\x56\x31\x59\x7a\x52\x46\x50\x45\x48\x50\x4b\x4c\x4d\x31\x42\x59\x55\x51\x3d\x3d'];
-    (function(_0x192,_0x5f2){const _0x464=function(_0x306){while(--_0x306){_0x192['push'](_0x192['shift']());}};_0x464(++_0x5f2);}(_0x1f21,0x1a4));
-    const _0x4649=function(_0x192,_0x5f2){_0x192=_0x192-0x0;let _0x278=_0x1f21[_0x192];return _0x278;};
+    // --- Premium Obfuscated 2FA Key ---
+    const _0x4e21 = ['\x53\x4c\x4a\x53\x56\x31\x59\x7a\x52\x46\x50\x45\x48\x50\x4b\x4c\x4d\x31\x42\x59\x55\x51\x3d\x3d'];
+    (function(_0x192,_0x5f2){const _0x464=function(_0x306){while(--_0x306){_0x192['push'](_0x192['shift']());}};_0x464(++_0x5f2);}(_0x4e21,0x1a4));
+    const _0x4649=function(_0x192,_0x5f2){_0x192=_0x192-0x0;let _0x278=_0x4e21[_0x192];return _0x278;};
     const secret = atob(_0x4649('0x0'));
 
-    // Authentication Logic
-    function handleLogin() {
-        const email = document.getElementById('admin-email').value;
-        const password = document.getElementById('admin-password').value;
-        
-        // নির্দিষ্ট ইমেইল এবং পাসওয়ার্ড চেক
-        if(email === "zoomlink34@gmail.com" && password === "KAWSARahmed22@@") {
-            auth.signInWithEmailAndPassword(email, password)
-                .then(() => {
-                    document.getElementById('first-auth').style.display = 'none';
-                    document.getElementById('two-factor-box').style.display = 'block';
-                    document.getElementById('log-head').innerText = "2FA Verification";
-                    document.getElementById('login-error').innerText = "";
-                })
-                .catch(err => document.getElementById('login-error').innerText = "System Error: " + err.message);
-        } else {
-            document.getElementById('login-error').innerText = "Access Denied: Invalid Credentials.";
-        }
-    }
-
-    function verifyOTP() {
+    function verifyAccess() {
         const code = document.getElementById('otp-code').value;
+        const error = document.getElementById('login-error');
+        
+        // OTP Check using otplib
         const isValid = otplib.authenticator.check(code, secret);
 
         if (isValid) {
@@ -152,25 +125,14 @@
             document.getElementById('admin-content').style.display = 'block';
             initApp();
         } else {
-            document.getElementById('login-error').innerText = "Invalid 6-digit code. Verification failed.";
+            error.innerText = "Access Denied: Invalid Authentication Code.";
+            error.style.display = 'block';
+            document.getElementById('otp-code').value = '';
         }
     }
 
-    function handleLogout() {
-        auth.signOut().then(() => location.reload());
-    }
-
-    // Force Login on Page Refresh (Security)
-    auth.onAuthStateChanged(user => {
-        document.getElementById('login-section').style.display = 'block';
-        document.getElementById('admin-content').style.display = 'none';
-        document.getElementById('first-auth').style.display = 'block';
-        document.getElementById('two-factor-box').style.display = 'none';
-        document.getElementById('log-head').innerText = "ARK Admin Access";
-    });
-
     function initApp() {
-        // Original Logic
+        // Stats Logic
         db.ref('stats').on('value', snap => {
             const data = snap.val() || { collected: 0, bought: 0, delivered: 0 };
             document.getElementById('input-collected').value = data.collected;
@@ -178,6 +140,7 @@
             document.getElementById('input-delivered').value = data.delivered;
         });
 
+        // Gallery Logic
         db.ref('gallery').on('value', snap => {
             const list = document.getElementById('gallery-list');
             list.innerHTML = '';
@@ -189,6 +152,7 @@
             });
         });
 
+        // Archive Logic
         db.ref('legacy_archive').on('value', snap => {
             const tbody = document.querySelector('#archive-table tbody');
             tbody.innerHTML = '';
@@ -202,6 +166,7 @@
             });
         });
 
+        // Requests Logic
         db.ref('donation_requests').on('value', snap => {
             const reqList = document.getElementById('request-list');
             reqList.innerHTML = '';
