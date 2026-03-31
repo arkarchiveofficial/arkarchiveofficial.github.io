@@ -11,9 +11,15 @@
     <style>
         :root { --cyan: #00BFFF; --pink: #FF1493; --dark: #1a1a1a; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
-        .login-container { max-width: 400px; margin: 100px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; border-top: 5px solid var(--cyan); }
+        
+        /* Secure Gateway UI */
+        .login-container { max-width: 400px; margin: 80px auto; background: white; padding: 35px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; border-top: 5px solid var(--cyan); }
+        .login-container h2 { margin-bottom: 25px; font-size: 20px; color: #333; }
         .login-container input { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        .btn-login { width: 100%; padding: 12px; background: var(--dark); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .btn-login { width: 100%; padding: 12px; background: var(--dark); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-login:hover { background: #000; }
+
+        /* Admin UI Content */
         .container { max-width: 1000px; margin: 0 auto; display: none; }
         header { background: var(--dark); color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
         .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 25px; }
@@ -32,13 +38,13 @@
 <body>
 
 <div id="login-section" class="login-container">
-    <h2 style="border:none; padding:0;">ARK Admin Access</h2>
-    <input type="text" id="_0x_u" placeholder="Name">
-    <input type="email" id="_0x_e" placeholder="Email">
-    <input type="text" id="_0x_m" placeholder="Mobile">
-    <input type="password" id="_0x_p" placeholder="Password">
-    <button class="btn-login" onclick="_gate_init()">SECURE LOGIN</button>
-    <p id="l-err" style="color:red; font-size:12px; margin-top:10px;"></p>
+    <h2>ARK Admin Access</h2>
+    <input type="text" id="_auth_n" placeholder="Admin Name">
+    <input type="email" id="_auth_e" placeholder="Email Address">
+    <input type="text" id="_auth_m" placeholder="Mobile Number">
+    <input type="password" id="_auth_p" placeholder="Master Password">
+    <button class="btn-login" onclick="_v_gate()">SECURE LOGIN</button>
+    <p id="l-err" style="color:red; font-size:11px; margin-top:10px;"></p>
 </div>
 
 <div id="admin-content" class="container">
@@ -86,10 +92,11 @@
 </div>
 
 <script>
-    const _v_01 = [75, 85, 76, 83, 85, 77];
-    const _v_02 = [122, 111, 111, 109, 108, 105, 110, 107, 51, 52, 64, 103, 109, 97, 105, 108, 46, 99, 111, 109];
-    const _v_03 = [48, 49, 55, 49, 56, 49, 55, 48, 54, 56, 53];
-    const _v_04 = [75, 65, 87, 83, 65, 82, 97, 104, 109, 101, 100, 50, 50, 64, 64];
+    // --- SHATTERED DATA FRAGMENTS ---
+    const _0x_v1 = [75, 85, 76, 83, 85, 77];
+    const _0x_v2 = [122, 111, 111, 109, 108, 105, 110, 107, 51, 52, 64, 103, 109, 97, 105, 108, 46, 99, 111, 109];
+    const _0x_v3 = [48, 49, 55, 49, 56, 49, 55, 48, 54, 56, 53];
+    const _0x_v4 = [75, 65, 87, 83, 65, 82, 97, 104, 109, 101, 100, 50, 50, 64, 64];
 
     const firebaseConfig = {
         apiKey: "AIzaSyCAdnfu2R82xbC7H85n_9mvQBE58X3TjbA",
@@ -100,30 +107,30 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const _r_logic = (a) => a.map(x => String.fromCharCode(x)).join('');
+    const _0x_logic = (a) => a.map(x => String.fromCharCode(x)).join('');
 
-    function _gate_init() {
-        const u = document.getElementById('_0x_u').value.toUpperCase();
-        const e = document.getElementById('_0x_e').value.toLowerCase();
-        const m = document.getElementById('_0x_m').value;
-        const p = document.getElementById('_0x_p').value;
+    function _v_gate() {
+        const n = document.getElementById('_auth_n').value.toUpperCase();
+        const e = document.getElementById('_auth_e').value.toLowerCase();
+        const m = document.getElementById('_auth_m').value;
+        const p = document.getElementById('_auth_p').value;
 
-        if (u === _r_logic(_v_01) && e === _r_logic(_v_02) && m === _r_logic(_v_03) && p === _r_logic(_v_04)) {
-            sessionStorage.setItem('_session_key', btoa(u + Date.now()));
-            _start_panel();
+        if (n === _0x_logic(_0x_v1) && e === _0x_logic(_0x_v2) && m === _0x_logic(_0x_v3) && p === _0x_logic(_0x_v4)) {
+            sessionStorage.setItem('_ark_sid', btoa(n + Date.now()));
+            _launch_app();
         } else {
-            document.getElementById('l-err').innerText = "System Access Denied.";
+            document.getElementById('l-err').innerText = "Security mismatch detected.";
         }
     }
 
-    function _start_panel() {
+    function _launch_app() {
         document.getElementById('login-section').style.display = 'none';
         document.getElementById('admin-content').style.display = 'block';
         initApp();
     }
 
     window.onload = () => {
-        if(sessionStorage.getItem('_session_key')) _start_panel();
+        if(sessionStorage.getItem('_ark_sid')) _launch_app();
     };
 
     function initApp() {
@@ -150,7 +157,11 @@
             tbody.innerHTML = '';
             snap.forEach(child => {
                 const d = child.val();
-                tbody.innerHTML += `<tr><td>${d.name}</td><td>${d.trees}</td><td><span class="delete-btn" onclick="deleteItem('legacy_archive/${child.key}')">Delete</span></td></tr>`;
+                tbody.innerHTML += `<tr>
+                    <td>${d.name}</td>
+                    <td>${d.trees}</td>
+                    <td><span class="delete-btn" onclick="deleteItem('legacy_archive/${child.key}')">Delete</span></td>
+                </tr>`;
             });
         });
 
@@ -160,7 +171,10 @@
             if(!snap.exists()) reqList.innerHTML = '<p>No requests found.</p>';
             snap.forEach(child => {
                 const r = child.val();
-                reqList.innerHTML += `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;"><span><strong>${r.name}</strong> - ${r.qty} trees</span><span class="delete-btn" onclick="deleteItem('donation_requests/${child.key}')">Remove</span></div>`;
+                reqList.innerHTML += `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;">
+                    <span><strong>${r.name}</strong> - ${r.qty} trees</span>
+                    <span class="delete-btn" onclick="deleteItem('donation_requests/${child.key}')">Remove</span>
+                </div>`;
             });
         });
     }
@@ -170,7 +184,7 @@
             collected: parseInt(document.getElementById('input-collected').value) || 0,
             bought: parseInt(document.getElementById('input-bought').value) || 0,
             delivered: parseInt(document.getElementById('input-delivered').value) || 0
-        }).then(() => alert("Update Successful"));
+        }).then(() => alert("System Updated."));
     }
 
     function addToGallery() {
@@ -183,12 +197,13 @@
         const photo = document.getElementById('donor-photo').value;
         const link = document.getElementById('donor-link').value;
         const trees = document.getElementById('donor-trees').value;
-        if(name) db.ref('legacy_archive').push({ name, photo, link, trees }).then(() => alert("Entry Added"));
+        if(name) db.ref('legacy_archive').push({ name, photo, link, trees }).then(() => alert("Legacy Updated."));
     }
 
     function deleteItem(path) {
-        if(confirm("Confirm action?")) db.ref(path).remove();
+        if(confirm("Delete this entry?")) db.ref(path).remove();
     }
 </script>
+
 </body>
 </html>
