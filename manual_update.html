@@ -8,6 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/otplib/12.0.1/otplib-browser.all.min.js"></script>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
@@ -15,39 +16,53 @@
         :root { --cyan: #00BFFF; --pink: #FF1493; --dark: #0f172a; --light: #f8fafc; }
         body { font-family: 'Inter', sans-serif; background: var(--light); margin: 0; padding: 0; color: #1e293b; }
         
-        /* Secure Login Overlay */
+        /* Login Overlay Style */
         #login-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--dark); display: flex; justify-content: center; align-items: center; z-index: 1000;
         }
         .login-box {
-            background: white; padding: 30px; border-radius: 15px; width: 340px; text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            background: white; padding: 30px; border-radius: 12px; width: 320px; text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
-        .login-box h2 { margin-bottom: 20px; font-size: 20px; color: var(--dark); }
-        .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .login-box button { width: 100%; padding: 12px; background: var(--cyan); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        #login-error { color: #ef4444; font-size: 13px; margin-top: 10px; display: none; }
+        .login-box h2 { margin-bottom: 20px; color: var(--dark); font-size: 20px; }
+        .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; }
+        .login-box button { background: var(--cyan); color: white; width: 100%; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
 
-        /* Original Panel Styles */
+        /* 2FA Input Style */
+        #two-factor-box { display: none; }
+        .otp-input { text-align: center; font-size: 24px; letter-spacing: 5px; font-weight: bold; border: 2px solid var(--cyan) !important; color: var(--pink); }
+
+        /* Original Designs */
         .nav { background: var(--dark); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
         .nav h2 { margin: 0; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; }
+
         .container { max-width: 800px; margin: 20px auto; padding: 0 15px; }
+
         .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border-top: 4px solid var(--cyan); }
         .card.pink { border-top-color: var(--pink); }
+
         h3 { margin-top: 0; font-size: 16px; color: var(--dark); display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
         h3 i { color: var(--cyan); }
+
         .input-group { margin-bottom: 15px; }
         label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; color: #64748b; }
         input { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; box-sizing: border-box; transition: 0.3s; }
         input:focus { outline: none; border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,191,255,0.1); }
+
         .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.3s; text-transform: uppercase; font-size: 13px; letter-spacing: 0.5px; }
         .btn-update { background: var(--cyan); color: white; }
         .btn-add { background: var(--pink); color: white; }
+        .btn:active { transform: scale(0.98); }
+
         .data-list { margin-top: 20px; border-top: 1px solid #f1f5f9; padding-top: 15px; }
         .item { display: flex; justify-content: space-between; align-items: center; background: #f1f5f9; padding: 10px; border-radius: 6px; margin-bottom: 8px; font-size: 13px; }
         .del-btn { color: #ef4444; cursor: pointer; padding: 5px; }
-        .logout-btn { background: #334155; color: white; border: none; padding: 6px 15px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+        .logout-btn { background: transparent; color: #94a3b8; border: 1px solid #334155; padding: 5px 10px; border-radius: 4px; font-size: 11px; cursor: pointer; }
+
+        @media (max-width: 600px) {
+            .grid-inputs { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 
@@ -55,21 +70,35 @@
 
     <div id="login-overlay">
         <div class="login-box">
-            <h2>ARK Manual Update</h2>
-            <input type="email" id="email" placeholder="Admin Email">
-            <input type="password" id="pass" placeholder="Admin Password">
-            <button onclick="handleLogin()">Authorize Access</button>
-            <p id="login-error">Login Failed! Access Denied.</p>
+            <h2 id="log-head"><i class="fas fa-lock"></i> ARK SECURE LOGIN</h2>
+            
+            <div id="first-auth">
+                <input type="email" id="admin-email" placeholder="Email Address">
+                <input type="password" id="admin-pass" placeholder="Password">
+                <button id="login-btn" onclick="handleLogin()">Access Update Panel</button>
+            </div>
+
+            <div id="two-factor-box">
+                <p style="font-size: 12px; color: #64748b; margin-bottom: 10px;">Enter 6-digit Authenticator Code</p>
+                <input type="text" id="otp-code" class="otp-input" placeholder="000000" maxlength="6">
+                <button class="btn btn-update" onclick="verifyOTP()">VERIFY & PROCEED</button>
+            </div>
+
+            <p id="error-msg" style="color: #ef4444; font-size: 12px; margin-top: 10px; display: none;"></p>
         </div>
     </div>
 
     <div id="secure-content" style="display:none;">
         <div class="nav">
             <h2><i class="fas fa-tools"></i> ARK Update Panel</h2>
-            <button class="logout-btn" onclick="handleLogout()">Logout</button>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <button class="logout-btn" onclick="handleLogout()">Logout</button>
+                <div id="db-status" style="font-size: 10px; color: #4ade80;"><i class="fas fa-circle"></i> Online</div>
+            </div>
         </div>
 
         <div class="container">
+            
             <div class="card">
                 <h3><i class="fas fa-chart-line"></i> Live Stats (Website Header)</h3>
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
@@ -101,12 +130,25 @@
 
             <div class="card">
                 <h3><i class="fas fa-user-tag"></i> Add New Donor Plot</h3>
-                <div class="input-group"><label>Donor Full Name</label><input type="text" id="d-name"></div>
-                <div class="input-group"><label>Photo URL</label><input type="text" id="d-photo"></div>
-                <div class="input-group"><label>Website / Social Link</label><input type="text" id="d-link"></div>
-                <div class="input-group"><label>Total Trees Donated</label><input type="number" id="d-trees"></div>
+                <div class="input-group">
+                    <label>Donor Full Name</label>
+                    <input type="text" id="d-name" placeholder="Ex: John Doe">
+                </div>
+                <div class="input-group">
+                    <label>Photo URL (Square size preferred)</label>
+                    <input type="text" id="d-photo" placeholder="Link to profile photo">
+                </div>
+                <div class="input-group">
+                    <label>Website / Social Link</label>
+                    <input type="text" id="d-link" placeholder="https://fb.com/username">
+                </div>
+                <div class="input-group">
+                    <label>Total Trees Donated</label>
+                    <input type="number" id="d-trees" placeholder="Ex: 50">
+                </div>
                 <button class="btn btn-update" onclick="addDonor()">Create Legacy Plot</button>
             </div>
+
         </div>
     </div>
 
@@ -120,36 +162,69 @@
             messagingSenderId: "440824313752",
             appId: "1:440824313752:web:2c93344dcfe2ba0a4c5ded"
         };
+        
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.database();
 
-        // --- AUTH LOGIC ---
-        function handleLogin() {
-            const email = document.getElementById('email').value;
-            const pass = document.getElementById('pass').value;
-            const error = document.getElementById('login-error');
+        // --- Premium Obfuscated 2FA Key ---
+        const _0x3f21 = ['\x53\x4c\x4a\x53\x56\x31\x59\x7a\x52\x46\x50\x45\x48\x50\x4b\x4c\x4d\x31\x42\x59\x55\x51\x3d\x3d'];
+        (function(_0x192,_0x5f2){const _0x464=function(_0x306){while(--_0x306){_0x192['push'](_0x192['shift']());}};_0x464(++_0x5f2);}(_0x3f21,0x1a4));
+        const _0x4649=function(_0x192,_0x5f2){_0x192=_0x192-0x0;let _0x278=_0x3f21[_0x192];return _0x278;};
+        const secret = atob(_0x4649('0x0'));
 
-            auth.signInWithEmailAndPassword(email, pass).catch(err => {
+        // ১. সিকিউর লগইন লজিক
+        function handleLogin() {
+            const email = document.getElementById('admin-email').value;
+            const pass = document.getElementById('admin-pass').value;
+            const error = document.getElementById('error-msg');
+
+            // নির্দিষ্ট ইমেইল এবং পাসওয়ার্ড চেক
+            if(email === "zoomlink34@gmail.com" && pass === "KAWSARahmed22@@") {
+                auth.signInWithEmailAndPassword(email, pass)
+                    .then(() => {
+                        document.getElementById('first-auth').style.display = 'none';
+                        document.getElementById('two-factor-box').style.display = 'block';
+                        document.getElementById('log-head').innerHTML = '<i class="fas fa-shield-alt"></i> 2FA VERIFICATION';
+                        error.style.display = 'none';
+                    })
+                    .catch(err => {
+                        error.innerText = "System Error: " + err.message;
+                        error.style.display = 'block';
+                    });
+            } else {
+                error.innerText = "Access Denied: Invalid Admin Credentials.";
                 error.style.display = 'block';
-            });
+            }
         }
 
-        function handleLogout() { auth.signOut(); }
+        function verifyOTP() {
+            const code = document.getElementById('otp-code').value;
+            const isValid = otplib.authenticator.check(code, secret);
 
-        auth.onAuthStateChanged(user => {
-            if (user && user.email === 'zoomlink34@gmail.com') {
+            if (isValid) {
                 document.getElementById('login-overlay').style.display = 'none';
                 document.getElementById('secure-content').style.display = 'block';
-                loadData();
+                startPanel();
             } else {
-                document.getElementById('login-overlay').style.display = 'flex';
-                document.getElementById('secure-content').style.display = 'none';
+                document.getElementById('error-msg').innerText = "Invalid OTP code. Try again.";
+                document.getElementById('error-msg').style.display = 'block';
             }
+        }
+
+        // ২. সেশন কন্ট্রোল (রিফ্রেশ করলে লগআউট হবে)
+        auth.onAuthStateChanged(user => {
+            document.getElementById('login-overlay').style.display = 'flex';
+            document.getElementById('secure-content').style.display = 'none';
+            document.getElementById('first-auth').style.display = 'block';
+            document.getElementById('two-factor-box').style.display = 'none';
+            document.getElementById('log-head').innerHTML = '<i class="fas fa-lock"></i> ARK SECURE LOGIN';
         });
 
-        // --- ORIGINAL APP LOGIC ---
-        function loadData() {
+        function handleLogout() { auth.signOut().then(() => location.reload()); }
+
+        // ৩. অরিজিনাল প্যানেল ফাংশনসমূহ
+        function startPanel() {
             db.ref('stats').on('value', s => {
                 const d = s.val() || {collected:0, bought:0, delivered:0};
                 document.getElementById('s-coll').value = d.collected;
@@ -161,37 +236,54 @@
                 const div = document.getElementById('gallery-preview');
                 div.innerHTML = '<strong>Recent Gallery:</strong><br>';
                 s.forEach(child => {
-                    div.innerHTML += `<div class="item"><span>${child.val().substring(0, 30)}...</span><i class="fas fa-trash del-btn" onclick="deleteItem('gallery/${child.key}')"></i></div>`;
+                    div.innerHTML += `
+                        <div class="item">
+                            <span>${child.val().substring(0, 30)}...</span>
+                            <i class="fas fa-trash del-btn" onclick="deleteItem('gallery/${child.key}')"></i>
+                        </div>`;
                 });
             });
         }
 
         function saveStats() {
             db.ref('stats').set({
-                collected: parseInt(document.getElementById('s-coll').value),
-                bought: parseInt(document.getElementById('s-bought').value),
-                delivered: parseInt(document.getElementById('s-deliv').value)
-            }).then(() => alert("Stats Updated!"));
+                collected: parseInt(document.getElementById('s-coll').value) || 0,
+                bought: parseInt(document.getElementById('s-bought').value) || 0,
+                delivered: parseInt(document.getElementById('s-deliv').value) || 0
+            }).then(() => alert("Stats Updated Successfully!"));
         }
 
         function addPhoto() {
             const url = document.getElementById('img-url').value;
-            if(url) { db.ref('gallery').push(url); document.getElementById('img-url').value = ''; }
+            if(url) {
+                db.ref('gallery').push(url);
+                document.getElementById('img-url').value = '';
+            }
         }
 
         function addDonor() {
             const name = document.getElementById('d-name').value;
-            if(name) {
+            const photo = document.getElementById('d-photo').value;
+            const link = document.getElementById('d-link').value;
+            const trees = document.getElementById('d-trees').value;
+
+            if(name && photo) {
                 db.ref('legacy_archive').push({
-                    name, photo: document.getElementById('d-photo').value,
-                    link: document.getElementById('d-link').value,
-                    trees: document.getElementById('d-trees').value,
-                    timestamp: Date.now()
-                }).then(() => { alert("Donor Added!"); });
-            }
+                    name: name, photo: photo, link: link || "#",
+                    trees: trees || 0, timestamp: Date.now()
+                }).then(() => {
+                    alert("Donor Added to Grid!");
+                    document.getElementById('d-name').value = '';
+                    document.getElementById('d-photo').value = '';
+                    document.getElementById('d-link').value = '';
+                    document.getElementById('d-trees').value = '';
+                });
+            } else { alert("Please fill Name and Photo link."); }
         }
 
-        function deleteItem(path) { if(confirm("Delete?")) db.ref(path).remove(); }
+        function deleteItem(path) {
+            if(confirm("Confirm Delete?")) db.ref(path).remove();
+        }
     </script>
 </body>
 </html>
