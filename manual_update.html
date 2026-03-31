@@ -4,20 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ARK | Manual Update Panel</title>
-    
+
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
+    
     <style>
         :root { --cyan: #00BFFF; --pink: #FF1493; --dark: #0f172a; --light: #f8fafc; }
         body { font-family: 'Inter', sans-serif; background: var(--light); margin: 0; padding: 0; color: #1e293b; }
         
-        /* Security UI */
-        #gate-keeper { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--dark); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; }
-        .gate-card { background: white; padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 0 20px rgba(0,191,255,0.3); width: 320px; }
-        .gate-card input { width: 100%; padding: 12px; margin: 15px 0; border: 1px solid #ddd; border-radius: 8px; text-align: center; font-size: 16px; outline: none; }
-        .gate-btn { background: var(--cyan); color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; }
+        #gate-box { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--dark); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .login-box { background: white; padding: 30px; border-radius: 12px; width: 320px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .login-box h2 { margin-bottom: 20px; color: var(--dark); font-size: 18px; }
+        .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; text-align: center; }
+        .login-box button { background: var(--cyan); color: white; width: 100%; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
 
         .nav { background: var(--dark); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
         .container { max-width: 800px; margin: 20px auto; padding: 0 15px; }
@@ -37,102 +37,81 @@
 </head>
 <body>
 
-<script>
-    const _v1 = [75, 65, 87]; // KAW
-    const _v2 = [83, 65, 82]; // SAR
-    const _v3 = [97, 104, 109]; // ahm
-    const _v4 = [101, 100]; // ed
-    const _v5 = [50, 50, 64, 64]; // 22@@
-</script>
-
-<div id="gate-keeper">
-    <div class="gate-card">
-        <h2 style="margin:0; color:#333;">System Locked</h2>
-        <input type="password" id="access-key" placeholder="Enter Admin Key" onkeypress="if(event.key === 'Enter') unlock()">
-        <button class="gate-btn" onclick="unlock()">UNLOCK PANEL</button>
-        <p id="err" style="color:red; font-size:11px; margin-top:10px; display:none;">Invalid Key!</p>
+    <div id="gate-box">
+        <div class="login-box">
+            <h2><i class="fas fa-shield-alt"></i> SYSTEM AUTHORIZATION</h2>
+            <input type="password" id="gate-key" placeholder="Enter System Key" onkeypress="if(event.key === 'Enter') _verify_access()">
+            <button onclick="_verify_access()">VERIFY ACCESS</button>
+            <p id="gate-err" style="color:red; font-size:11px; margin-top:10px; display:none;">Access Forbidden!</p>
+        </div>
     </div>
-</div>
 
-<div id="secure-content" style="display:none;">
-    <div class="nav">
-        <h2><i class="fas fa-tools"></i> ARK Update Panel</h2>
-        <button onclick="location.reload()" style="background:none; border:1px solid #ff4444; color:#ff4444; padding:5px 10px; border-radius:5px; cursor:pointer;">Logout</button>
-    </div>
-    
-    <div class="container">
-        <div class="card">
-            <h3><i class="fas fa-chart-line"></i> Live Stats (Website Header)</h3>
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
-                <div class="input-group">
-                    <label>Collected ($)</label>
-                    <input type="number" id="s-coll">
+    <div id="secure-content" style="display:none;">
+        <div class="nav">
+            <h2><i class="fas fa-tools"></i> ARK Update Panel</h2>
+            <button onclick="location.reload()" style="background:transparent; border:1px solid #ff4444; color:#ff4444; cursor:pointer; padding:5px 10px; border-radius:5px;">Logout</button>
+        </div>
+        <div class="container">
+            <div class="card">
+                <h3><i class="fas fa-chart-line"></i> Live Stats</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                    <div class="input-group"><label>Collected ($)</label><input type="number" id="s-coll"></div>
+                    <div class="input-group"><label>Trees Bought</label><input type="number" id="s-bought"></div>
+                    <div class="input-group"><label>Handed Over</label><input type="number" id="s-deliv"></div>
                 </div>
-                <div class="input-group">
-                    <label>Trees Bought</label>
-                    <input type="number" id="s-bought">
-                </div>
-                <div class="input-group">
-                    <label>Handed Over</label>
-                    <input type="number" id="s-deliv">
-                </div>
+                <button class="btn btn-update" onclick="saveStats()">Update Stats</button>
             </div>
-            <button class="btn btn-update" onclick="saveStats()">Update Main Stats</button>
-        </div>
 
-        <div class="card pink">
-            <h3><i class="fas fa-images"></i> Add Mission Photo</h3>
-            <div class="input-group">
-                <label>Image URL</label>
-                <input type="text" id="img-url" placeholder="https://example.com/photo.jpg">
+            <div class="card pink">
+                <h3><i class="fas fa-images"></i> Mission Gallery</h3>
+                <div class="input-group"><label>Image URL</label><input type="text" id="img-url"></div>
+                <button class="btn btn-add" onclick="addPhoto()">Add to Gallery</button>
+                <div id="gallery-preview" class="data-list"></div>
             </div>
-            <button class="btn btn-add" onclick="addPhoto()">Push to Gallery</button>
-            <div id="gallery-preview" class="data-list"></div>
-        </div>
 
-        <div class="card">
-            <h3><i class="fas fa-user-tag"></i> Add New Donor Plot</h3>
-            <div class="input-group"><label>Name</label><input type="text" id="d-name"></div>
-            <div class="input-group"><label>Photo URL</label><input type="text" id="d-photo"></div>
-            <div class="input-group"><label>Social Link</label><input type="text" id="d-link"></div>
-            <div class="input-group"><label>Trees</label><input type="number" id="d-trees"></div>
-            <button class="btn btn-update" onclick="addDonor()">Create Legacy Plot</button>
-            <div id="donor-list" class="data-list"></div>
+            <div class="card">
+                <h3><i class="fas fa-user-tag"></i> Donor Plot</h3>
+                <div class="input-group"><label>Name</label><input type="text" id="d-name"></div>
+                <div class="input-group"><label>Photo URL</label><input type="text" id="d-photo"></div>
+                <div class="input-group"><label>Link</label><input type="text" id="d-link"></div>
+                <div class="input-group"><label>Trees</label><input type="number" id="d-trees"></div>
+                <button class="btn btn-update" onclick="addDonor()">Create Plot</button>
+            </div>
         </div>
     </div>
-</div>
 
 <script>
-    // Password Verification Logic
-    function unlock() {
-        const input = document.getElementById('access-key').value;
-        const master = [..._v1, ..._v2, ..._v3, ..._v4, ..._v5].map(c => String.fromCharCode(c)).join('');
+    const _p1 = [84, 84, 97, 112, 66, 107];
+    const _p2 = [84, 113, 114, 68, 110, 122, 72, 98, 87];
+    const _p3 = [122, 101, 107, 54, 119, 83, 66, 85, 84, 99, 74, 75, 70, 109, 82, 56, 87, 115, 54];
+
+    function _verify_access() {
+        const input = document.getElementById('gate-key').value;
+        const master = [..._p1, ..._p2, ..._p3].map(c => String.fromCharCode(c)).join('');
         
         if(input === master) {
-            document.getElementById('gate-keeper').remove();
+            document.getElementById('gate-box').remove();
             document.getElementById('secure-content').style.display = 'block';
-            initApp();
+            _start_service();
         } else {
-            document.getElementById('err').style.display = 'block';
-            document.getElementById('access-key').value = '';
+            document.getElementById('gate-err').style.display = 'block';
+            document.getElementById('gate-key').value = '';
         }
     }
 
-    // Firebase Config
-    const firebaseConfig = { 
-        apiKey: "AIzaSyCAdnfu2R82xbC7H85n_9mvQBE58X3TjbA", 
-        authDomain: "the-5k-elite-legacy.firebaseapp.com", 
-        databaseURL: "https://the-5k-elite-legacy-default-rtdb.firebaseio.com", 
-        projectId: "the-5k-elite-legacy", 
-        storageBucket: "the-5k-elite-legacy.firebasestorage.app", 
-        messagingSenderId: "440824313752", 
-        appId: "1:440824313752:web:2c93344dcfe2ba0a4c5ded" 
+    const firebaseConfig = {
+        apiKey: "AIzaSyCAdnfu2R82xbC7H85n_9mvQBE58X3TjbA",
+        authDomain: "the-5k-elite-legacy.firebaseapp.com",
+        databaseURL: "https://the-5k-elite-legacy-default-rtdb.firebaseio.com",
+        projectId: "the-5k-elite-legacy",
+        storageBucket: "the-5k-elite-legacy.firebasestorage.app",
+        messagingSenderId: "440824313752",
+        appId: "1:440824313752:web:2c93344dcfe2ba0a4c5ded"
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    function initApp() {
-        // Load Stats
+    function _start_service() {
         db.ref('stats').on('value', s => {
             const d = s.val() || {collected:0, bought:0, delivered:0};
             document.getElementById('s-coll').value = d.collected;
@@ -140,31 +119,21 @@
             document.getElementById('s-deliv').value = d.delivered;
         });
 
-        // Load Gallery Preview
         db.ref('gallery').on('value', s => {
             const div = document.getElementById('gallery-preview');
-            div.innerHTML = '<strong>Recent Gallery:</strong>';
+            div.innerHTML = '';
             s.forEach(child => {
-                div.innerHTML += `<div class="item"><span>${child.val().substring(0, 40)}...</span><i class="fas fa-trash del-btn" onclick="deleteItem('gallery/${child.key}')"></i></div>`;
-            });
-        });
-
-        // Load Donor List
-        db.ref('legacy_archive').on('value', s => {
-            const div = document.getElementById('donor-list');
-            div.innerHTML = '<strong>Current Donors:</strong>';
-            s.forEach(child => {
-                div.innerHTML += `<div class="item"><span>${child.val().name} (${child.val().trees} trees)</span><i class="fas fa-trash del-btn" onclick="deleteItem('legacy_archive/${child.key}')"></i></div>`;
+                div.innerHTML += `<div class="item"><span>${child.val().substring(0, 35)}...</span><i class="fas fa-trash del-btn" onclick="deleteItem('gallery/${child.key}')"></i></div>`;
             });
         });
     }
 
     function saveStats() {
         db.ref('stats').set({
-            collected: parseInt(document.getElementById('s-coll').value),
-            bought: parseInt(document.getElementById('s-bought').value),
-            delivered: parseInt(document.getElementById('s-deliv').value)
-        }).then(() => alert("Stats Updated!")).catch(e => alert("Permission Denied! Please check Firebase Rules."));
+            collected: parseInt(document.getElementById('s-coll').value) || 0,
+            bought: parseInt(document.getElementById('s-bought').value) || 0,
+            delivered: parseInt(document.getElementById('s-deliv').value) || 0
+        }).then(() => alert("Success"));
     }
 
     function addPhoto() {
@@ -173,18 +142,16 @@
     }
 
     function addDonor() {
-        const data = {
+        const d = {
             name: document.getElementById('d-name').value,
             photo: document.getElementById('d-photo').value,
             link: document.getElementById('d-link').value,
             trees: document.getElementById('d-trees').value
         };
-        if(data.name) db.ref('legacy_archive').push(data).then(() => alert("Donor Added!"));
+        if(d.name) db.ref('legacy_archive').push(d).then(() => alert("Success"));
     }
 
-    function deleteItem(path) {
-        if(confirm("Confirm Delete?")) db.ref(path).remove();
-    }
+    function deleteItem(path) { if(confirm("Delete?")) db.ref(path).remove(); }
 </script>
 </body>
 </html>
