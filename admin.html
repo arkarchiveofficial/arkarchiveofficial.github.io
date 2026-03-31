@@ -14,7 +14,7 @@
         
         /* Login UI */
         .login-container { max-width: 400px; margin: 100px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; border-top: 5px solid var(--cyan); }
-        .login-container input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; text-align: center; }
+        .login-container input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; text-align: center; font-size: 16px; outline: none; }
         .btn-login { width: 100%; padding: 12px; background: var(--dark); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s; }
         .btn-login:hover { background: #333; }
 
@@ -32,25 +32,24 @@
         th, td { padding: 12px; border: 1px solid #eee; text-align: left; font-size: 14px; }
         .delete-btn { color: red; cursor: pointer; font-weight: bold; }
         .logout-btn { background: #ef4444; color: white; font-size: 12px; }
+        #login-error { color: #ff4444; font-size: 13px; margin-top: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <script>
-    const _p1 = [73, 32, 76];
-    const _p2 = [79, 86, 69];
-    const _p3 = [32, 89, 79];
-    const _p4 = [85, 32, 77];
-    const _p5 = [79, 77, 32];
-    const _p6 = [65, 78, 68];
-    const _p7 = [32, 68, 65, 68];
+    const _s1 = [75, 65, 87];
+    const _s2 = [83, 65, 82];
+    const _s3 = [97, 104, 109];
+    const _s4 = [101, 100, 50, 50];
+    const _s5 = [64, 64];
 </script>
 
 <div id="login-section" class="login-container">
-    <h2 style="border:none; padding:0;">ARK Admin Access</h2>
-    <input type="password" id="gate-key" placeholder="Enter Security Password">
-    <button class="btn-login" onclick="validateKey()">UNLOCK PANEL</button>
-    <p id="login-error" style="color:red; font-size:12px; margin-top:10px;"></p>
+    <h2 style="border:none; padding:0; margin-bottom: 20px;">ARK Admin Access</h2>
+    <input type="password" id="sys-gate" placeholder="Security Password" onkeypress="if(event.key === 'Enter') handleGate()">
+    <button class="btn-login" onclick="handleGate()">UNLOCK PANEL</button>
+    <p id="login-error"></p>
 </div>
 
 <div id="admin-content" class="container">
@@ -110,23 +109,23 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Security Logic to Reconstruct Password from Scattered Parts
-    function validateKey() {
-        const input = document.getElementById('gate-key').value.trim().toUpperCase();
-        const fullKey = [..._p1, ..._p2, ..._p3, ..._p4, ..._p5, ..._p6, ..._p7].map(c => String.fromCharCode(c)).join('');
-        
-        if (input === fullKey) {
+    // Reconstruct the hidden password
+    function handleGate() {
+        const inp = document.getElementById('sys-gate').value;
+        const master = [..._s1, ..._s2, ..._s3, ..._s4, ..._s5].map(c => String.fromCharCode(c)).join('');
+
+        if (inp === master) {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('admin-content').style.display = 'block';
             initApp();
         } else {
-            document.getElementById('login-error').innerText = "Access Denied: Incorrect Password";
-            document.getElementById('gate-key').value = "";
+            document.getElementById('login-error').innerText = "Access Denied: Wrong Password!";
+            document.getElementById('sys-gate').value = "";
         }
     }
 
     function initApp() {
-        // Stats Logic
+        // Stats
         db.ref('stats').on('value', snap => {
             const data = snap.val() || { collected: 0, bought: 0, delivered: 0 };
             document.getElementById('input-collected').value = data.collected;
@@ -134,7 +133,7 @@
             document.getElementById('input-delivered').value = data.delivered;
         });
 
-        // Gallery Logic
+        // Gallery
         db.ref('gallery').on('value', snap => {
             const list = document.getElementById('gallery-list');
             list.innerHTML = '';
@@ -146,31 +145,24 @@
             });
         });
 
-        // Archive Logic
+        // Archive
         db.ref('legacy_archive').on('value', snap => {
             const tbody = document.querySelector('#archive-table tbody');
             tbody.innerHTML = '';
             snap.forEach(child => {
                 const d = child.val();
-                tbody.innerHTML += `<tr>
-                    <td>${d.name}</td>
-                    <td>${d.trees}</td>
-                    <td><span class="delete-btn" onclick="deleteItem('legacy_archive/${child.key}')">Delete</span></td>
-                </tr>`;
+                tbody.innerHTML += `<tr><td>${d.name}</td><td>${d.trees}</td><td><span class="delete-btn" onclick="deleteItem('legacy_archive/${child.key}')">Delete</span></td></tr>`;
             });
         });
 
-        // Requests Logic
+        // Requests
         db.ref('donation_requests').on('value', snap => {
             const reqList = document.getElementById('request-list');
             reqList.innerHTML = '';
             if(!snap.exists()) reqList.innerHTML = '<p>No requests found.</p>';
             snap.forEach(child => {
                 const r = child.val();
-                reqList.innerHTML += `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;">
-                    <span><strong>${r.name}</strong> - ${r.qty} trees</span>
-                    <span class="delete-btn" onclick="deleteItem('donation_requests/${child.key}')">Remove</span>
-                </div>`;
+                reqList.innerHTML += `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;"><span><strong>${r.name}</strong> - ${r.qty} trees</span><span class="delete-btn" onclick="deleteItem('donation_requests/${child.key}')">Remove</span></div>`;
             });
         });
     }
@@ -180,14 +172,12 @@
             collected: parseInt(document.getElementById('input-collected').value) || 0,
             bought: parseInt(document.getElementById('input-bought').value) || 0,
             delivered: parseInt(document.getElementById('input-delivered').value) || 0
-        }).then(() => alert("Stats Updated Successfully!"));
+        }).then(() => alert("Stats Updated!"));
     }
 
     function addToGallery() {
         const url = document.getElementById('gallery-url').value;
-        if(url) {
-            db.ref('gallery').push(url).then(() => document.getElementById('gallery-url').value = '');
-        }
+        if(url) db.ref('gallery').push(url).then(() => document.getElementById('gallery-url').value = '');
     }
 
     function addToArchive() {
@@ -195,13 +185,11 @@
         const photo = document.getElementById('donor-photo').value;
         const link = document.getElementById('donor-link').value;
         const trees = document.getElementById('donor-trees').value;
-        if(name) {
-            db.ref('legacy_archive').push({ name, photo, link, trees }).then(() => alert("Donor Added!"));
-        }
+        if(name) db.ref('legacy_archive').push({ name, photo, link, trees }).then(() => alert("Added!"));
     }
 
     function deleteItem(path) {
-        if(confirm("Are you sure?")) db.ref(path).remove();
+        if(confirm("Confirm Delete?")) db.ref(path).remove();
     }
 </script>
 
