@@ -7,153 +7,226 @@
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/otplib/12.0.1/otplib-browser.all.min.js"></script>
 
     <style>
         :root { --cyan: #00BFFF; --pink: #FF1493; --dark: #1a1a1a; }
-        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: #333; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
         
-        /* New Secure Login UI */
-        .login-container { max-width: 400px; width: 90%; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); text-align: center; border-top: 6px solid var(--cyan); position: relative; }
-        .login-container h2 { font-size: 22px; margin-bottom: 25px; letter-spacing: 1px; color: var(--dark); }
-        .login-container input { width: 100%; padding: 15px; margin-bottom: 20px; border: 2px solid #e2e8f0; border-radius: 10px; box-sizing: border-box; font-size: 16px; transition: 0.3s; }
-        .login-container input:focus { border-color: var(--cyan); outline: none; box-shadow: 0 0 10px rgba(0, 191, 255, 0.2); }
-        .btn-login { width: 100%; padding: 15px; background: var(--dark); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; letter-spacing: 1px; }
-        
-        /* Admin Content */
-        .container { max-width: 1000px; width: 100%; margin: 0 auto; display: none; background: #f0f2f5; min-height: 100vh; padding: 20px; border-radius: 15px; }
-        header { background: var(--dark); color: white; padding: 20px; border-radius: 12px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 25px; }
-        h2 { border-left: 5px solid var(--cyan); padding-left: 15px; margin-bottom: 20px; color: #1e293b; font-size: 20px; }
-        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
-        .btn-save { background: var(--cyan); color: white; width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .logout-btn { background: #ef4444; color: white; padding: 8px 15px; border-radius: 6px; border: none; cursor: pointer; }
-        
-        #step-2 { display: none; }
+        /* Login UI */
+        .login-container { max-width: 400px; margin: 100px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; border-top: 5px solid var(--cyan); }
+        .login-container input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        .btn-login { width: 100%; padding: 12px; background: var(--dark); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+
+        /* Admin UI */
+        .container { max-width: 1000px; margin: 0 auto; display: none; }
+        header { background: var(--dark); color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 25px; }
+        h2 { border-left: 5px solid var(--cyan); padding-left: 15px; margin-bottom: 20px; color: #333; font-size: 20px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        button { cursor: pointer; padding: 12px 20px; border: none; border-radius: 6px; font-weight: bold; transition: 0.3s; }
+        .btn-save { background: var(--cyan); color: white; width: 100%; }
+        .btn-add { background: var(--pink); color: white; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
+        th, td { padding: 12px; border: 1px solid #eee; text-align: left; font-size: 14px; }
+        .delete-btn { color: red; cursor: pointer; font-weight: bold; }
+        .logout-btn { background: #ef4444; color: white; font-size: 12px; }
     </style>
 </head>
 <body>
 
 <div id="login-section" class="login-container">
-    <div id="step-1">
-        <div style="width: 50px; height: 5px; background: var(--cyan); margin: 0 auto 20px; border-radius: 10px;"></div>
-        <h2>ARK SYSTEM LOCK</h2>
-        <input type="password" id="sys-pass" placeholder="Enter Master Password">
-        <button class="btn-login" onclick="validateStep1()">NEXT STEP</button>
+    <h2 style="border:none; padding:0;">ARK Admin Access</h2>
+    <div id="pass-step">
+        <input type="password" id="sys-pass" placeholder="Enter System Password">
+        <button class="btn-login" onclick="verifyPass()">NEXT</button>
     </div>
-    
-    <div id="step-2">
-        <div style="width: 50px; height: 5px; background: var(--pink); margin: 0 auto 20px; border-radius: 10px;"></div>
-        <h2>2FA VERIFICATION</h2>
-        <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">Enter the 6-digit code from your app</p>
-        <input type="text" id="otp-code" placeholder="0 0 0 0 0 0" maxlength="6" style="text-align:center; font-size: 24px; letter-spacing: 8px; font-weight: bold;">
-        <button class="btn-login" onclick="validateStep2()" style="background: var(--pink);">VERIFY & ACCESS</button>
+    <div id="otp-step" style="display:none;">
+        <p style="font-size:12px; margin-bottom:10px;">Enter 6-digit Code from Authenticator App</p>
+        <input type="text" id="otp-code" placeholder="000000" maxlength="6" style="text-align:center; letter-spacing:5px;">
+        <button class="btn-login" onclick="verifyOTP()">VERIFY & ENTER</button>
     </div>
-    <p id="err-msg" style="color: #ef4444; font-size: 13px; margin-top: 15px; font-weight: 500;"></p>
+    <p id="login-error" style="color:red; font-size:12px; margin-top:10px;"></p>
 </div>
 
 <div id="admin-content" class="container">
     <header>
-        <h1 style="font-size: 22px; margin: 0;">ARK ARCHIVE <span style="color: var(--cyan);">ADMIN</span></h1>
-        <button class="logout-btn" onclick="logout()">LOGOUT</button>
+        <h1>ARK ARCHIVE ADMIN</h1>
+        <button class="logout-btn" onclick="handleLogout()">LOGOUT</button>
     </header>
 
     <div class="card">
         <h2>Section 1: Live Stats Control</h2>
         <div class="grid-3">
-            <div><label>Collected ($)</label><input type="number" id="in-coll"></div>
-            <div><label>Trees Bought</label><input type="number" id="in-bought"></div>
-            <div><label>Handed Over</label><input type="number" id="in-del"></div>
+            <div><label>Collected ($)</label><input type="number" id="input-collected"></div>
+            <div><label>Trees Bought</label><input type="number" id="input-bought"></div>
+            <div><label>Handed Over</label><input type="number" id="input-delivered"></div>
         </div>
         <button class="btn-save" onclick="updateStats()">UPDATE LIVE STATS</button>
     </div>
 
     <div class="card">
         <h2>Section 2: Mission Gallery</h2>
-        <input type="text" id="gal-url" placeholder="Paste Image URL here...">
-        <button style="background: var(--pink); color:white; width: 100%; padding: 12px; border-radius: 8px; border:none; cursor:pointer; font-weight:bold;" onclick="addGal()">ADD TO GALLERY</button>
-        <div id="gal-list" style="margin-top:20px; display: flex; gap: 10px; flex-wrap: wrap;"></div>
+        <input type="text" id="gallery-url" placeholder="Paste Image URL here...">
+        <button class="btn-add" onclick="addToGallery()">ADD TO GALLERY</button>
+        <div id="gallery-list" style="margin-top:15px; display: flex; gap: 10px; flex-wrap: wrap;"></div>
     </div>
-    
-    <p style="text-align: center; color: #94a3b8; font-size: 12px;">Security Level: 99.9% MILITARY GRADE</p>
+
+    <div class="card">
+        <h2>Section 3: Legacy Archive</h2>
+        <div class="grid-3">
+            <input type="text" id="donor-name" placeholder="Donor Name">
+            <input type="text" id="donor-photo" placeholder="Photo URL">
+            <input type="text" id="donor-link" placeholder="Social Link">
+        </div>
+        <input type="number" id="donor-trees" placeholder="Number of Trees">
+        <button class="btn-add" style="background: var(--cyan);" onclick="addToArchive()">ADD TO LEGACY GRID</button>
+        <table id="archive-table">
+            <thead><tr><th>Name</th><th>Trees</th><th>Action</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h2>Section 4: Recent Donation Requests</h2>
+        <div id="request-list"><p>Loading requests...</p></div>
+    </div>
 </div>
 
 <script>
-    // --- OBFUSCATED SECURITY KEYS ---
-    // pass: KAWSARahmed22@@ | key: JBSWY3DPEHPK3PXP
-    const _0x55a1 = ["\x4b\x41\x57\x53\x41\x52\x61\x68\x6d\x65\x64\x32\x32\x40\x40", "\x4a\x42\x53\x57\x59\x33\x44\x50\x45\x48\x50\x4b\x33\x50\x58\x50"];
-
-    // Firebase Initialization
+    // Firebase Config
     const firebaseConfig = {
         apiKey: "AIzaSyCAdnfu2R82xbC7H85n_9mvQBE58X3TjbA",
         authDomain: "the-5k-elite-legacy.firebaseapp.com",
         databaseURL: "https://the-5k-elite-legacy-default-rtdb.firebaseio.com",
         projectId: "the-5k-elite-legacy",
         storageBucket: "the-5k-elite-legacy.firebasestorage.app",
+        messagingSenderId: "440824313752",
         appId: "1:440824313752:web:2c93344dcfe2ba0a4c5ded"
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    function validateStep1() {
+    // --- SECURITY DATA (OBFUSCATED) ---
+    const _0x4f22 = ["\x4b\x41\x57\x53\x41\x52\x61\x68\x6d\x65\x64\x32\x32\x40\x40", "\x4a\x42\x53\x57\x59\x33\x44\x50\x45\x48\x50\x4b\x33\x50\x58\x50"];
+
+    function verifyPass() {
         const p = document.getElementById('sys-pass').value;
-        if(p === _0x55a1[0]) {
-            document.getElementById('step-1').style.display = 'none';
-            document.getElementById('step-2').style.display = 'block';
-            document.getElementById('err-msg').innerText = "";
+        if(p === _0x4f22[0]) {
+            document.getElementById('pass-step').style.display = 'none';
+            document.getElementById('otp-step').style.display = 'block';
+            document.getElementById('login-error').innerText = "";
         } else {
-            document.getElementById('err-msg').innerText = "Access Denied: Invalid Master Password";
+            document.getElementById('login-error').innerText = "Wrong Password!";
         }
     }
 
-    function validateStep2() {
+    function verifyOTP() {
         const code = document.getElementById('otp-code').value;
-        const isValid = otplib.authenticator.check(code, _0x55a1[1]);
-        if(isValid) {
-            sessionStorage.setItem('ark_session', 'active');
-            enterPanel();
-        } else {
-            document.getElementById('err-msg').innerText = "Verification Failed: Invalid OTP Code";
+        const secret = _0x4f22[1];
+        try {
+            const isValid = otplib.authenticator.check(code, secret);
+            if(isValid) {
+                sessionStorage.setItem('ark_auth', 'true');
+                showAdmin();
+            } else {
+                document.getElementById('login-error').innerText = "Invalid OTP!";
+            }
+        } catch(e) {
+            document.getElementById('login-error').innerText = "OTP Verification Error!";
         }
     }
 
-    function enterPanel() {
+    function showAdmin() {
         document.getElementById('login-section').style.display = 'none';
         document.getElementById('admin-content').style.display = 'block';
-        document.body.style.background = "#f0f2f5";
-        loadData();
+        initApp();
     }
 
-    function logout() {
-        sessionStorage.clear();
+    function handleLogout() {
+        sessionStorage.removeItem('ark_auth');
         location.reload();
     }
 
-    window.onload = () => {
-        if(sessionStorage.getItem('ark_session') === 'active') enterPanel();
-    };
+    // Auto check session
+    window.onload = function() {
+        if(sessionStorage.getItem('ark_auth') === 'true') {
+            showAdmin();
+        }
+    }
 
-    // --- Original Functions ---
-    function loadData() {
-        db.ref('stats').on('value', s => {
-            const d = s.val() || {};
-            document.getElementById('in-coll').value = d.collected || 0;
-            document.getElementById('in-bought').value = d.bought || 0;
-            document.getElementById('in-del').value = d.delivered || 0;
+    // --- Original Logic (Design & Function Unchanged) ---
+    function initApp() {
+        db.ref('stats').on('value', snap => {
+            const data = snap.val() || { collected: 0, bought: 0, delivered: 0 };
+            document.getElementById('input-collected').value = data.collected;
+            document.getElementById('input-bought').value = data.bought;
+            document.getElementById('input-delivered').value = data.delivered;
+        });
+
+        db.ref('gallery').on('value', snap => {
+            const list = document.getElementById('gallery-list');
+            list.innerHTML = '';
+            snap.forEach(child => {
+                list.innerHTML += `<div style="position:relative">
+                    <img src="${child.val()}" width="80" height="60" style="border-radius:5px; object-fit:cover;">
+                    <span class="delete-btn" style="position:absolute; top:-5px; right:-5px; background:white; border-radius:50%; padding:2px 6px; font-size:10px;" onclick="deleteItem('gallery/${child.key}')">×</span>
+                </div>`;
+            });
+        });
+
+        db.ref('legacy_archive').on('value', snap => {
+            const tbody = document.querySelector('#archive-table tbody');
+            tbody.innerHTML = '';
+            snap.forEach(child => {
+                const d = child.val();
+                tbody.innerHTML += `<tr>
+                    <td>${d.name}</td>
+                    <td>${d.trees}</td>
+                    <td><span class="delete-btn" onclick="deleteItem('legacy_archive/${child.key}')">Delete</span></td>
+                </tr>`;
+            });
+        });
+
+        db.ref('donation_requests').on('value', snap => {
+            const reqList = document.getElementById('request-list');
+            reqList.innerHTML = '';
+            if(!snap.exists()) reqList.innerHTML = '<p>No requests found.</p>';
+            snap.forEach(child => {
+                const r = child.val();
+                reqList.innerHTML += `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;">
+                    <span><strong>${r.name}</strong> - ${r.qty} trees</span>
+                    <span class="delete-btn" onclick="deleteItem('donation_requests/${child.key}')">Remove</span>
+                </div>`;
+            });
         });
     }
 
     function updateStats() {
         db.ref('stats').set({
-            collected: parseInt(document.getElementById('in-coll').value),
-            bought: parseInt(document.getElementById('in-bought').value),
-            delivered: parseInt(document.getElementById('in-del').value)
-        }).then(() => alert("Stats Synchronized!"));
+            collected: parseInt(document.getElementById('input-collected').value) || 0,
+            bought: parseInt(document.getElementById('input-bought').value) || 0,
+            delivered: parseInt(document.getElementById('input-delivered').value) || 0
+        }).then(() => alert("Stats Updated!"));
     }
 
-    function addGal() {
-        const u = document.getElementById('gal-url').value;
-        if(u) db.ref('gallery').push(u).then(() => document.getElementById('gal-url').value = "");
+    function addToGallery() {
+        const url = document.getElementById('gallery-url').value;
+        if(url) db.ref('gallery').push(url).then(() => document.getElementById('gallery-url').value = '');
+    }
+
+    function addToArchive() {
+        const name = document.getElementById('donor-name').value;
+        const photo = document.getElementById('donor-photo').value;
+        const link = document.getElementById('donor-link').value;
+        const trees = document.getElementById('donor-trees').value;
+        if(name) db.ref('legacy_archive').push({ name, photo, link, trees }).then(() => alert("Added!"));
+    }
+
+    function deleteItem(path) {
+        if(confirm("Are you sure?")) db.ref(path).remove();
     }
 </script>
 
