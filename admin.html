@@ -14,9 +14,10 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
         
         /* Login UI */
-        .login-container { max-width: 400px; margin: 100px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; border-top: 5px solid var(--cyan); }
-        .login-container input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; display: block; }
-        .btn-login { width: 100%; padding: 12px; background: var(--dark); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .login-container { max-width: 450px; margin: 100px auto; background: white; padding: 35px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; border-top: 5px solid var(--cyan); }
+        .login-container input { width: 100%; padding: 14px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; text-align: center; font-size: 16px; }
+        .btn-login { width: 100%; padding: 14px; background: var(--dark); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; }
+        .btn-login:hover { background: #333; }
 
         /* Admin UI */
         .container { max-width: 1000px; margin: 0 auto; display: none; }
@@ -32,20 +33,16 @@
         th, td { padding: 12px; border: 1px solid #eee; text-align: left; font-size: 14px; }
         .delete-btn { color: red; cursor: pointer; font-weight: bold; }
         .logout-btn { background: #ef4444; color: white; font-size: 12px; }
+        #login-error { color: #ff4444; font-size: 13px; margin-top: 15px; font-weight: 500; }
     </style>
 </head>
 <body>
 
 <div id="login-section" class="login-container">
-    <h2 style="border:none; padding:0; margin-bottom: 20px;">ARK Admin Access</h2>
-    
-    <input type="text" id="admin-name" placeholder="Admin Name">
-    <input type="email" id="admin-email" placeholder="Email Address">
-    <input type="text" id="admin-mobile" placeholder="Mobile Number">
-    <input type="password" id="admin-password" placeholder="Password">
-    
-    <button class="btn-login" onclick="handleLogin()">SECURE LOGIN</button>
-    <p id="login-error" style="color:red; font-size:12px; margin-top:10px;"></p>
+    <h2 style="border:none; padding:0; margin-bottom: 25px;">ARK Admin Access</h2>
+    <input type="password" id="system-pass" placeholder="Enter System Password">
+    <button class="btn-login" onclick="handleLogin()">NEXT</button>
+    <p id="login-error"></p>
 </div>
 
 <div id="admin-content" class="container">
@@ -105,26 +102,23 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Verification Keys (Obfuscated)
-    const _v1 = [75, 85, 76, 83, 85, 77]; 
-    const _v2 = [122, 111, 111, 109, 108, 105, 110, 107, 51, 52, 64, 103, 109, 97, 105, 108, 46, 99, 111, 109]; 
-    const _v3 = [48, 49, 55, 49, 56, 49, 55, 48, 54, 56, 53]; 
-    const _v4 = [75, 65, 87, 83, 65, 82, 97, 104, 109, 101, 100, 50, 50, 64, 64]; 
-
-    const _decode = (arr) => arr.map(c => String.fromCharCode(c)).join('');
+    // Hidden Multi-Word Password (ASCII Obfuscation)
+    // Decodes to: "I LOVE YOU MOM AND DAD"
+    const _key = [73, 32, 76, 79, 86, 69, 32, 89, 79, 85, 32, 77, 79, 77, 32, 65, 78, 68, 32, 68, 65, 68];
+    const _shh = (a) => a.map(c => String.fromCharCode(c)).join('');
 
     function handleLogin() {
-        const n = document.getElementById('admin-name').value.toUpperCase();
-        const e = document.getElementById('admin-email').value.toLowerCase();
-        const m = document.getElementById('admin-mobile').value;
-        const p = document.getElementById('admin-password').value;
+        const input = document.getElementById('system-pass').value;
+        const error = document.getElementById('login-error');
 
-        if (n === _decode(_v1) && e === _decode(_v2) && m === _decode(_v3) && p === _decode(_v4)) {
+        // Validation against the hidden key
+        if (input === _shh(_key)) {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('admin-content').style.display = 'block';
             initApp();
         } else {
-            document.getElementById('login-error').innerText = "Authentication Failed: Missing or Invalid Data";
+            error.innerText = "System Access Denied: Incorrect Password";
+            document.getElementById('system-pass').value = "";
         }
     }
 
