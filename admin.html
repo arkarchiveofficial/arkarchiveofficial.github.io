@@ -41,7 +41,7 @@
 <div id="login-section" class="login-container">
     <h2 style="border:none; padding:0; margin-bottom: 25px;">ARK Admin Access</h2>
     <input type="password" id="system-pass" placeholder="Enter System Password">
-    <button class="btn-login" onclick="handleLogin()">NEXT</button>
+    <button class="btn-login" onclick="handleLogin()">VERIFY & ENTER</button>
     <p id="login-error"></p>
 </div>
 
@@ -102,22 +102,20 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Hidden Multi-Word Password (ASCII Obfuscation)
-    // Decodes to: "I LOVE YOU MOM AND DAD"
+    // Hidden Key: "I LOVE YOU MOM AND DAD"
     const _key = [73, 32, 76, 79, 86, 69, 32, 89, 79, 85, 32, 77, 79, 77, 32, 65, 78, 68, 32, 68, 65, 68];
     const _shh = (a) => a.map(c => String.fromCharCode(c)).join('');
 
     function handleLogin() {
-        const input = document.getElementById('system-pass').value;
+        const input = document.getElementById('system-pass').value.trim().toUpperCase();
         const error = document.getElementById('login-error');
 
-        // Validation against the hidden key
         if (input === _shh(_key)) {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('admin-content').style.display = 'block';
             initApp();
         } else {
-            error.innerText = "System Access Denied: Incorrect Password";
+            error.innerText = "Access Denied: Wrong Password!";
             document.getElementById('system-pass').value = "";
         }
     }
