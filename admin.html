@@ -13,12 +13,10 @@
         :root { --cyan: #00BFFF; --pink: #FF1493; --dark: #1a1a1a; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
         
-        /* Login UI */
         .login-container { max-width: 400px; margin: 100px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; border-top: 5px solid var(--cyan); }
-        .login-container input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        .login-container input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; display: block; }
         .btn-login { width: 100%; padding: 12px; background: var(--dark); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
 
-        /* Admin UI */
         .container { max-width: 1000px; margin: 0 auto; display: none; }
         header { background: var(--dark); color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
         .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 25px; }
@@ -37,12 +35,14 @@
 <body>
 
 <div id="login-section" class="login-container">
-    <h2 style="border:none; padding:0;">ARK Admin Access</h2>
-    <input type="text" id="admin-name" placeholder="Admin Name">
-    <input type="email" id="admin-email" placeholder="Email Address">
-    <input type="text" id="admin-mobile" placeholder="Mobile Number">
-    <input type="password" id="admin-password" placeholder="Password">
-    <button class="btn-login" onclick="handleLogin()">SECURE LOGIN</button>
+    <h2 style="border:none; padding:0; margin-bottom: 20px;">ARK Admin Access</h2>
+    
+    <input type="text" id="auth-name" placeholder="Name">
+    <input type="email" id="auth-email" placeholder="Email Address">
+    <input type="text" id="auth-mobile" placeholder="Mobile Number">
+    <input type="password" id="auth-password" placeholder="Password">
+    
+    <button class="btn-login" onclick="handleLogin()">VERIFY & ENTER</button>
     <p id="login-error" style="color:red; font-size:12px; margin-top:10px;"></p>
 </div>
 
@@ -102,38 +102,34 @@
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    const auth = firebase.auth();
 
-    // Security Data (ASCII Obfuscated)
-    const _vName = [75, 85, 76, 83, 85, 77]; // KULSUM
-    const _vMail = [122, 111, 111, 109, 108, 105, 110, 107, 51, 52, 64, 103, 109, 97, 105, 108, 46, 99, 111, 109]; // zoomlink34@gmail.com
-    const _vMob = [48, 49, 55, 49, 56, 49, 55, 48, 54, 56, 53]; // 01718170685
-    const _vPass = [75, 65, 87, 83, 65, 82, 97, 104, 109, 101, 100, 50, 50, 64, 64]; // KAWSARahmed22@@
+    const _k1 = [75, 85, 76, 83, 85, 77]; 
+    const _k2 = [122, 111, 111, 109, 108, 105, 110, 107, 51, 52, 64, 103, 109, 97, 105, 108, 46, 99, 111, 109]; 
+    const _k3 = [48, 49, 55, 49, 56, 49, 55, 48, 54, 56, 53]; 
+    const _k4 = [75, 65, 87, 83, 65, 82, 97, 104, 109, 101, 100, 50, 50, 64, 64]; 
 
-    const _decode = (arr) => arr.map(c => String.fromCharCode(c)).join('');
+    const _keyGen = (arr) => arr.map(c => String.fromCharCode(c)).join('');
 
     function handleLogin() {
-        const name = document.getElementById('admin-name').value.toUpperCase();
-        const email = document.getElementById('admin-email').value.toLowerCase();
-        const mobile = document.getElementById('admin-mobile').value;
-        const password = document.getElementById('admin-password').value;
+        const uN = document.getElementById('auth-name').value.toUpperCase();
+        const uE = document.getElementById('auth-email').value.toLowerCase();
+        const uM = document.getElementById('auth-mobile').value;
+        const uP = document.getElementById('auth-password').value;
 
-        if (name === _decode(_vName) && email === _decode(_vMail) && mobile === _decode(_vMob) && password === _decode(_vPass)) {
-            // Authentication bypass to show content, using Firebase for underlying session check if needed
+        if (uN === _keyGen(_k1) && uE === _keyGen(_k2) && uM === _keyGen(_k3) && uP === _keyGen(_k4)) {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('admin-content').style.display = 'block';
             initApp();
         } else {
-            document.getElementById('login-error').innerText = "Access Denied: Invalid Credentials";
+            document.getElementById('login-error').innerText = "Identity mismatch. Check all 4 fields.";
         }
     }
 
     function handleLogout() {
-        location.reload(); // Refresh forces relogin as requested
+        location.reload();
     }
 
     function initApp() {
-        // Stats Logic
         db.ref('stats').on('value', snap => {
             const data = snap.val() || { collected: 0, bought: 0, delivered: 0 };
             document.getElementById('input-collected').value = data.collected;
@@ -141,7 +137,6 @@
             document.getElementById('input-delivered').value = data.delivered;
         });
 
-        // Gallery Logic
         db.ref('gallery').on('value', snap => {
             const list = document.getElementById('gallery-list');
             list.innerHTML = '';
@@ -153,31 +148,21 @@
             });
         });
 
-        // Archive Logic
         db.ref('legacy_archive').on('value', snap => {
             const tbody = document.querySelector('#archive-table tbody');
             tbody.innerHTML = '';
             snap.forEach(child => {
                 const d = child.val();
-                tbody.innerHTML += `<tr>
-                    <td>${d.name}</td>
-                    <td>${d.trees}</td>
-                    <td><span class="delete-btn" onclick="deleteItem('legacy_archive/${child.key}')">Delete</span></td>
-                </tr>`;
+                tbody.innerHTML += `<tr><td>${d.name}</td><td>${d.trees}</td><td><span class="delete-btn" onclick="deleteItem('legacy_archive/${child.key}')">Delete</span></td></tr>`;
             });
         });
 
-        // Requests Logic
         db.ref('donation_requests').on('value', snap => {
             const reqList = document.getElementById('request-list');
             reqList.innerHTML = '';
-            if(!snap.exists()) reqList.innerHTML = '<p>No requests found.</p>';
             snap.forEach(child => {
                 const r = child.val();
-                reqList.innerHTML += `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;">
-                    <span><strong>${r.name}</strong> - ${r.qty} trees</span>
-                    <span class="delete-btn" onclick="deleteItem('donation_requests/${child.key}')">Remove</span>
-                </div>`;
+                reqList.innerHTML += `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;"><span><strong>${r.name}</strong> - ${r.qty} trees</span><span class="delete-btn" onclick="deleteItem('donation_requests/${child.key}')">Remove</span></div>`;
             });
         });
     }
@@ -192,9 +177,7 @@
 
     function addToGallery() {
         const url = document.getElementById('gallery-url').value;
-        if(url) {
-            db.ref('gallery').push(url).then(() => document.getElementById('gallery-url').value = '');
-        }
+        if(url) db.ref('gallery').push(url).then(() => document.getElementById('gallery-url').value = '');
     }
 
     function addToArchive() {
@@ -202,9 +185,7 @@
         const photo = document.getElementById('donor-photo').value;
         const link = document.getElementById('donor-link').value;
         const trees = document.getElementById('donor-trees').value;
-        if(name) {
-            db.ref('legacy_archive').push({ name, photo, link, trees }).then(() => alert("Added!"));
-        }
+        if(name) db.ref('legacy_archive').push({ name, photo, link, trees }).then(() => alert("Added!"));
     }
 
     function deleteItem(path) {
