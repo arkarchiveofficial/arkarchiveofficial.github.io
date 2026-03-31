@@ -7,7 +7,6 @@
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
     <style>
         :root { --cyan: #00BFFF; --pink: #FF1493; --dark: #1a1a1a; }
@@ -15,11 +14,11 @@
         
         /* Login UI */
         .login-container { max-width: 450px; margin: 100px auto; background: white; padding: 35px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; border-top: 5px solid var(--cyan); }
-        .login-container input { width: 100%; padding: 14px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; text-align: center; font-size: 16px; }
+        .login-container input { width: 100%; padding: 14px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; text-align: center; font-size: 16px; outline: none; }
         .btn-login { width: 100%; padding: 14px; background: var(--dark); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; }
         .btn-login:hover { background: #333; }
 
-        /* Admin UI */
+        /* Admin UI (Hidden by default) */
         .container { max-width: 1000px; margin: 0 auto; display: none; }
         header { background: var(--dark); color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
         .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 25px; }
@@ -40,15 +39,15 @@
 
 <div id="login-section" class="login-container">
     <h2 style="border:none; padding:0; margin-bottom: 25px;">ARK Admin Access</h2>
-    <input type="password" id="system-pass" placeholder="Enter System Password">
-    <button class="btn-login" onclick="handleLogin()">VERIFY & ENTER</button>
+    <input type="password" id="system-pass" placeholder="Enter System Password" onkeypress="if(event.key === 'Enter') handleLogin()">
+    <button class="btn-login" onclick="handleLogin()">ACCESS PANEL</button>
     <p id="login-error"></p>
 </div>
 
 <div id="admin-content" class="container">
     <header>
         <h1>ARK ARCHIVE ADMIN</h1>
-        <button class="logout-btn" onclick="handleLogout()">LOGOUT</button>
+        <button class="logout-btn" onclick="location.reload()">LOGOUT</button>
     </header>
 
     <div class="card">
@@ -90,6 +89,7 @@
 </div>
 
 <script>
+    // Firebase Configuration
     const firebaseConfig = {
         apiKey: "AIzaSyCAdnfu2R82xbC7H85n_9mvQBE58X3TjbA",
         authDomain: "the-5k-elite-legacy.firebaseapp.com",
@@ -99,32 +99,32 @@
         messagingSenderId: "440824313752",
         appId: "1:440824313752:web:2c93344dcfe2ba0a4c5ded"
     };
+    
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Hidden Key: "I LOVE YOU MOM AND DAD"
-    const _key = [73, 32, 76, 79, 86, 69, 32, 89, 79, 85, 32, 77, 79, 77, 32, 65, 78, 68, 32, 68, 65, 68];
-    const _shh = (a) => a.map(c => String.fromCharCode(c)).join('');
+    // Password Key (Encrypted style)
+    const _secret = [73, 32, 76, 79, 86, 69, 32, 89, 79, 85, 32, 77, 79, 77, 32, 65, 78, 68, 32, 68, 65, 68];
+    const _verify = (s) => s.map(c => String.fromCharCode(c)).join('');
 
+    // Access Control Logic
     function handleLogin() {
         const input = document.getElementById('system-pass').value.trim().toUpperCase();
         const error = document.getElementById('login-error');
 
-        if (input === _shh(_key)) {
+        if (input === _verify(_secret)) {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('admin-content').style.display = 'block';
-            initApp();
+            initApp(); // Load database content after login
         } else {
             error.innerText = "Access Denied: Wrong Password!";
             document.getElementById('system-pass').value = "";
         }
     }
 
-    function handleLogout() {
-        location.reload();
-    }
-
+    // Load Data Functions
     function initApp() {
+        // Stats
         db.ref('stats').on('value', snap => {
             const data = snap.val() || { collected: 0, bought: 0, delivered: 0 };
             document.getElementById('input-collected').value = data.collected;
@@ -132,6 +132,7 @@
             document.getElementById('input-delivered').value = data.delivered;
         });
 
+        // Gallery
         db.ref('gallery').on('value', snap => {
             const list = document.getElementById('gallery-list');
             list.innerHTML = '';
@@ -143,6 +144,7 @@
             });
         });
 
+        // Archive
         db.ref('legacy_archive').on('value', snap => {
             const tbody = document.querySelector('#archive-table tbody');
             tbody.innerHTML = '';
@@ -152,6 +154,7 @@
             });
         });
 
+        // Donation Requests
         db.ref('donation_requests').on('value', snap => {
             const reqList = document.getElementById('request-list');
             reqList.innerHTML = '';
@@ -163,12 +166,13 @@
         });
     }
 
+    // Database Actions
     function updateStats() {
         db.ref('stats').set({
             collected: parseInt(document.getElementById('input-collected').value) || 0,
             bought: parseInt(document.getElementById('input-bought').value) || 0,
             delivered: parseInt(document.getElementById('input-delivered').value) || 0
-        }).then(() => alert("Stats Updated!"));
+        }).then(() => alert("Stats Updated Successfully!"));
     }
 
     function addToGallery() {
@@ -181,11 +185,11 @@
         const photo = document.getElementById('donor-photo').value;
         const link = document.getElementById('donor-link').value;
         const trees = document.getElementById('donor-trees').value;
-        if(name) db.ref('legacy_archive').push({ name, photo, link, trees }).then(() => alert("Added!"));
+        if(name) db.ref('legacy_archive').push({ name, photo, link, trees }).then(() => alert("Donor Added!"));
     }
 
     function deleteItem(path) {
-        if(confirm("Are you sure?")) db.ref(path).remove();
+        if(confirm("Are you sure you want to delete this?")) db.ref(path).remove();
     }
 </script>
 
