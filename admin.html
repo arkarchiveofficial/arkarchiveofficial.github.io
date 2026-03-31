@@ -10,82 +10,70 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
     <style>
-        /* আপনার দেওয়া মূল ডিজাইন ও কালার কোড */
         :root { --cyan: #00BFFF; --pink: #FF1493; --dark: #1a1a1a; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
         
-        /* লগইন বক্স ডিজাইন */
-        #login-overlay {
+        /* Login UI Styles */
+        #login-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--dark); display: flex; justify-content: center; align-items: center; z-index: 1000;
+            background: var(--dark); display: flex; justify-content: center; align-items: center; z-index: 9999;
         }
         .login-box {
-            background: white; padding: 30px; border-radius: 12px; width: 320px; text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            background: white; padding: 30px; border-radius: 15px; width: 320px; text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
         }
-        .login-box h2 { margin-bottom: 20px; color: var(--dark); font-size: 22px; }
-        .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        .login-box button { background: var(--cyan); color: white; width: 100%; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .login-box h2 { color: var(--dark); margin-bottom: 20px; font-size: 22px; }
+        .login-box input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .login-box button { width: 100%; padding: 12px; background: var(--cyan); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        #login-error { color: red; font-size: 13px; margin-top: 10px; display: none; }
 
-        /* আপনার অ্যাডমিন প্যানেলের মূল স্টাইল */
+        /* Admin Content Styles (Your Original CSS) */
         .container { max-width: 1000px; margin: 0 auto; }
         header { background: var(--dark); color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
-        
         .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 25px; }
         h2 { border-left: 5px solid var(--cyan); padding-left: 15px; margin-bottom: 20px; color: #333; font-size: 20px; }
-        
         .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
         input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
         button { cursor: pointer; padding: 12px 20px; border: none; border-radius: 6px; font-weight: bold; transition: 0.3s; }
         .btn-save { background: var(--cyan); color: white; width: 100%; }
         .btn-add { background: var(--pink); color: white; margin-top: 10px; }
-        
         table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
         th, td { padding: 12px; border: 1px solid #eee; text-align: left; font-size: 14px; }
         th { background: #f8f9fa; }
         .req-card { border-bottom: 1px solid #eee; padding: 10px 0; display: flex; justify-content: space-between; }
         .delete-btn { color: red; cursor: pointer; font-weight: bold; }
-        .logout-btn { background: #444; color: #ccc; font-size: 11px; padding: 5px 10px; margin-top: 5px; cursor: pointer; border: none; border-radius: 4px; }
+        .logout-btn { background: #444; color: white; padding: 8px 15px; font-size: 12px; border-radius: 5px; }
     </style>
 </head>
 
 <body>
 
-<div id="login-overlay">
+<div id="login-screen">
     <div class="login-box">
-        <h2>ARK ADMIN LOGIN</h2>
-        <input type="email" id="admin-email" placeholder="Email (arkarchiveofficial@gmail.com)">
+        <h2>ARK Admin Login</h2>
+        <input type="email" id="admin-email" placeholder="Email Address">
         <input type="password" id="admin-pass" placeholder="Password">
-        <button id="login-btn" onclick="handleLogin()">Login to Panel</button>
-        <p id="error-msg" style="color: red; font-size: 12px; margin-top: 10px; display: none;"></p>
+        <button onclick="handleLogin()">Access Admin Panel</button>
+        <p id="login-error">Invalid Credentials!</p>
     </div>
 </div>
 
 <div id="admin-content" style="display:none;">
     <div class="container">
         <header>
-            <div>
-                <h1 style="margin:0;">ARK ARCHIVE ADMIN</h1>
-                <button class="logout-btn" onclick="handleLogout()">Sign Out</button>
+            <h1>ARK ARCHIVE ADMIN</h1>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div id="status-indicator" style="color: #00ff00;">● Secure Session</div>
+                <button class="logout-btn" onclick="handleLogout()">Logout</button>
             </div>
-            <div id="status-indicator" style="color: #00ff00;">● Securely Connected</div>
         </header>
 
         <div class="card">
             <h2>Section 1: Live Stats Control</h2>
             <div class="grid-3">
-                <div>
-                    <label>Collected ($)</label>
-                    <input type="number" id="input-collected" placeholder="0">
-                </div>
-                <div>
-                    <label>Trees Bought</label>
-                    <input type="number" id="input-bought" placeholder="0">
-                </div>
-                <div>
-                    <label>Handed Over</label>
-                    <input type="number" id="input-delivered" placeholder="0">
-                </div>
+                <div><label>Collected ($)</label><input type="number" id="input-collected"></div>
+                <div><label>Trees Bought</label><input type="number" id="input-bought"></div>
+                <div><label>Handed Over</label><input type="number" id="input-delivered"></div>
             </div>
             <button class="btn-save" onclick="updateStats()">UPDATE LIVE STATS</button>
         </div>
@@ -108,24 +96,20 @@
             <button class="btn-add" style="background: var(--cyan);" onclick="addToArchive()">ADD TO LEGACY GRID</button>
             
             <table id="archive-table">
-                <thead>
-                    <tr><th>Name</th><th>Trees</th><th>Action</th></tr>
-                </thead>
+                <thead><tr><th>Name</th><th>Trees</th><th>Action</th></tr></thead>
                 <tbody></tbody>
             </table>
         </div>
 
         <div class="card">
             <h2>Section 4: Recent Donation Requests</h2>
-            <div id="request-list">
-                <p>Loading requests...</p>
-            </div>
+            <div id="request-list"><p>Loading requests...</p></div>
         </div>
     </div>
 </div>
 
 <script>
-    // Firebase Configuration (অক্ষত রাখা হয়েছে)
+    // Firebase Config
     const firebaseConfig = {
         apiKey: "AIzaSyCAdnfu2R82xbC7H85n_9mvQBE58X3TjbA",
         authDomain: "the-5k-elite-legacy.firebaseapp.com",
@@ -135,44 +119,45 @@
         messagingSenderId: "440824313752",
         appId: "1:440824313752:web:2c93344dcfe2ba0a4c5ded"
     };
-
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.database();
 
-    // ১. লগইন হ্যান্ডলিং (Authentication)
+    // --- Authentication Logic ---
     function handleLogin() {
         const email = document.getElementById('admin-email').value;
         const pass = document.getElementById('admin-pass').value;
-        const btn = document.getElementById('login-btn');
-        const error = document.getElementById('error-msg');
+        const errorMsg = document.getElementById('login-error');
 
-        btn.innerText = "Verifying...";
         auth.signInWithEmailAndPassword(email, pass)
             .catch(err => {
-                error.innerText = "Error: " + err.message;
-                error.style.display = 'block';
-                btn.innerText = "Login to Panel";
+                errorMsg.style.display = 'block';
+                console.error(err.message);
             });
     }
 
-    // ২. সেশন চেক (ইউজার লগইন থাকলে প্যানেল দেখাবে)
+    function handleLogout() {
+        auth.signOut();
+    }
+
+    // Auth State Observer
     auth.onAuthStateChanged(user => {
-        if (user) {
-            document.getElementById('login-overlay').style.display = 'none';
-            document.getElementById('admin-content').style.display = 'block';
-            startApp();
+        const loginScreen = document.getElementById('login-screen');
+        const adminContent = document.getElementById('admin-content');
+
+        if (user && user.email === 'zoomlink34@gmail.com') {
+            loginScreen.style.display = 'none';
+            adminContent.style.display = 'block';
+            initApp(); // লগইন সফল হলে অ্যাপ লোড হবে
         } else {
-            document.getElementById('login-overlay').style.display = 'flex';
-            document.getElementById('admin-content').style.display = 'none';
+            loginScreen.style.display = 'flex';
+            adminContent.style.display = 'none';
         }
     });
 
-    function handleLogout() { auth.signOut(); }
-
-    // ৩. ডাটাবেস ফাংশন (যা আপনার মূল কোডে ছিল)
-    function startApp() {
-        // ১. Stats Logic
+    // --- Original Logic (Init inside Auth) ---
+    function initApp() {
+        // Stats
         db.ref('stats').on('value', snap => {
             const data = snap.val() || { collected: 0, bought: 0, delivered: 0 };
             document.getElementById('input-collected').value = data.collected;
@@ -180,19 +165,19 @@
             document.getElementById('input-delivered').value = data.delivered;
         });
 
-        // ২. Gallery Logic
+        // Gallery
         db.ref('gallery').on('value', snap => {
             const list = document.getElementById('gallery-list');
             list.innerHTML = '';
             snap.forEach(child => {
                 list.innerHTML += `<div style="position:relative">
                     <img src="${child.val()}" width="80" height="60" style="border-radius:5px">
-                    <span class="delete-btn" style="position:absolute; top:0; right:0; background:white; padding: 2px;" onclick="deleteItem('gallery/${child.key}')">×</span>
+                    <span class="delete-btn" style="position:absolute; top:0; right:0; background:white; padding: 0 4px;" onclick="deleteItem('gallery/${child.key}')">×</span>
                 </div>`;
             });
         });
 
-        // ৩. Legacy Archive Logic
+        // Archive
         db.ref('legacy_archive').on('value', snap => {
             const tbody = document.querySelector('#archive-table tbody');
             tbody.innerHTML = '';
@@ -206,12 +191,11 @@
             });
         });
 
-        // ৪. Donation Requests Logic
+        // Requests
         db.ref('donation_requests').on('value', snap => {
             const reqList = document.getElementById('request-list');
             reqList.innerHTML = '';
             if(!snap.exists()) reqList.innerHTML = '<p>No requests found.</p>';
-            
             snap.forEach(child => {
                 const r = child.val();
                 reqList.innerHTML += `
@@ -226,7 +210,7 @@
         });
     }
 
-    // আপনার মূল ফাংশনগুলো অপরিবর্তিত রাখা হয়েছে
+    // --- Original Functions ---
     function updateStats() {
         db.ref('stats').set({
             collected: parseInt(document.getElementById('input-collected').value),
