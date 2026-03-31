@@ -13,55 +13,44 @@
         :root { --cyan: #00BFFF; --pink: #FF1493; --dark: #1a1a1a; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
         
-        /* আপনার পাঠানো ছবির মতো ডিজাইন যেখানে ৪টি বক্স থাকবে */
+        /* Login UI */
         .login-container { max-width: 400px; margin: 100px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; border-top: 5px solid var(--cyan); }
-        
-        /* ইনপুট বক্সগুলোর স্পষ্ট স্টাইল */
-        .login-container input { 
-            width: 100%; 
-            padding: 12px; 
-            margin-bottom: 15px; 
-            border: 1px solid #ddd; 
-            border-radius: 6px; 
-            box-sizing: border-box; 
-            display: block; /* নিশ্চিত করা হয়েছে যেন সবগুলো বক্স নিচে নিচে দেখা যায় */
-            font-size: 14px;
-        }
-        
-        .btn-login { width: 100%; padding: 12px; background: var(--dark); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+        .login-container input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; display: block; }
+        .btn-login { width: 100%; padding: 12px; background: var(--dark); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
 
-        /* এডমিন প্যানেল ডিজাইন */
+        /* Admin UI */
         .container { max-width: 1000px; margin: 0 auto; display: none; }
         header { background: var(--dark); color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
         .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 25px; }
         h2 { border-left: 5px solid var(--cyan); padding-left: 15px; margin-bottom: 20px; color: #333; font-size: 20px; }
         .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
-        
+        input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        button { cursor: pointer; padding: 12px 20px; border: none; border-radius: 6px; font-weight: bold; transition: 0.3s; }
         .btn-save { background: var(--cyan); color: white; width: 100%; }
         .btn-add { background: var(--pink); color: white; margin-top: 10px; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
         th, td { padding: 12px; border: 1px solid #eee; text-align: left; font-size: 14px; }
         .delete-btn { color: red; cursor: pointer; font-weight: bold; }
-        .logout-btn { background: #ef4444; color: white; font-size: 12px; padding: 8px 15px; border-radius: 5px; }
+        .logout-btn { background: #ef4444; color: white; font-size: 12px; }
     </style>
 </head>
 <body>
 
 <div id="login-section" class="login-container">
-    <h2 style="border:none; padding:0; margin-bottom: 25px;">ARK Admin Access</h2>
+    <h2 style="border:none; padding:0; margin-bottom: 20px;">ARK Admin Access</h2>
     
-    <input type="text" id="auth-name" placeholder="Admin Name">
-    <input type="email" id="auth-email" placeholder="Email Address">
-    <input type="text" id="auth-mobile" placeholder="Mobile Number">
-    <input type="password" id="auth-password" placeholder="System Password">
+    <input type="text" id="admin-name" placeholder="Admin Name">
+    <input type="email" id="admin-email" placeholder="Email Address">
+    <input type="text" id="admin-mobile" placeholder="Mobile Number">
+    <input type="password" id="admin-password" placeholder="Password">
     
-    <button class="btn-login" onclick="handleLogin()">Verify & Enter</button>
-    <p id="login-error" style="color:red; font-size:12px; margin-top:10px; font-weight: bold;"></p>
+    <button class="btn-login" onclick="handleLogin()">SECURE LOGIN</button>
+    <p id="login-error" style="color:red; font-size:12px; margin-top:10px;"></p>
 </div>
 
 <div id="admin-content" class="container">
     <header>
-        <h1 style="margin:0; font-size: 22px;">ARK ARCHIVE ADMIN</h1>
+        <h1>ARK ARCHIVE ADMIN</h1>
         <button class="logout-btn" onclick="handleLogout()">LOGOUT</button>
     </header>
 
@@ -104,7 +93,6 @@
 </div>
 
 <script>
-    // ফায়ারবেস কনফিগ (আপনার অরিজিনাল ডাটা)
     const firebaseConfig = {
         apiKey: "AIzaSyCAdnfu2R82xbC7H85n_9mvQBE58X3TjbA",
         authDomain: "the-5k-elite-legacy.firebaseapp.com",
@@ -117,27 +105,26 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // অবফাসকেটেড সিকিউরিটি ডাটা (কোন কমেন্ট নেই)
-    const _s1 = [75, 85, 76, 83, 85, 77]; 
-    const _s2 = [122, 111, 111, 109, 108, 105, 110, 107, 51, 52, 64, 103, 109, 97, 105, 108, 46, 99, 111, 109]; 
-    const _s3 = [48, 49, 55, 49, 56, 49, 55, 48, 54, 56, 53]; 
-    const _s4 = [75, 65, 87, 83, 65, 82, 97, 104, 109, 101, 100, 50, 50, 64, 64]; 
+    // Verification Keys (Obfuscated)
+    const _v1 = [75, 85, 76, 83, 85, 77]; 
+    const _v2 = [122, 111, 111, 109, 108, 105, 110, 107, 51, 52, 64, 103, 109, 97, 105, 108, 46, 99, 111, 109]; 
+    const _v3 = [48, 49, 55, 49, 56, 49, 55, 48, 54, 56, 53]; 
+    const _v4 = [75, 65, 87, 83, 65, 82, 97, 104, 109, 101, 100, 50, 50, 64, 64]; 
 
-    const _v = (a) => a.map(c => String.fromCharCode(c)).join('');
+    const _decode = (arr) => arr.map(c => String.fromCharCode(c)).join('');
 
     function handleLogin() {
-        const n = document.getElementById('auth-name').value.toUpperCase();
-        const e = document.getElementById('auth-email').value.toLowerCase();
-        const m = document.getElementById('auth-mobile').value;
-        const p = document.getElementById('auth-password').value;
+        const n = document.getElementById('admin-name').value.toUpperCase();
+        const e = document.getElementById('admin-email').value.toLowerCase();
+        const m = document.getElementById('admin-mobile').value;
+        const p = document.getElementById('admin-password').value;
 
-        // ৪টি ইনফরমেশন চেক
-        if (n === _v(_s1) && e === _v(_s2) && m === _v(_s3) && p === _v(_s4)) {
+        if (n === _decode(_v1) && e === _decode(_v2) && m === _decode(_v3) && p === _decode(_v4)) {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('admin-content').style.display = 'block';
             initApp();
         } else {
-            document.getElementById('login-error').innerText = "Incorrect Information! Check all 4 fields.";
+            document.getElementById('login-error').innerText = "Authentication Failed: Missing or Invalid Data";
         }
     }
 
@@ -146,7 +133,6 @@
     }
 
     function initApp() {
-        // লাইভ স্ট্যাটাস ডাটা লোড
         db.ref('stats').on('value', snap => {
             const data = snap.val() || { collected: 0, bought: 0, delivered: 0 };
             document.getElementById('input-collected').value = data.collected;
@@ -154,7 +140,6 @@
             document.getElementById('input-delivered').value = data.delivered;
         });
 
-        // গ্যালারি লোড
         db.ref('gallery').on('value', snap => {
             const list = document.getElementById('gallery-list');
             list.innerHTML = '';
@@ -166,7 +151,6 @@
             });
         });
 
-        // আর্কাইভ টেবিল লোড
         db.ref('legacy_archive').on('value', snap => {
             const tbody = document.querySelector('#archive-table tbody');
             tbody.innerHTML = '';
@@ -176,10 +160,10 @@
             });
         });
 
-        // রিকোয়েস্ট লিস্ট লোড
         db.ref('donation_requests').on('value', snap => {
             const reqList = document.getElementById('request-list');
             reqList.innerHTML = '';
+            if(!snap.exists()) reqList.innerHTML = '<p>No requests found.</p>';
             snap.forEach(child => {
                 const r = child.val();
                 reqList.innerHTML += `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;"><span><strong>${r.name}</strong> - ${r.qty} trees</span><span class="delete-btn" onclick="deleteItem('donation_requests/${child.key}')">Remove</span></div>`;
