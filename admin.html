@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARK ADMIN | Advanced Global Control</title>
+    <title>ARK | Master Admin Panel</title>
     
     <script>
         function checkAccess() {
             const pass = "zoomlink34@gmail.com";
-            let enteredPass = prompt("Please enter Admin Password to access:");
+            let enteredPass = prompt("Enter Master Password:");
             if (enteredPass !== pass) {
-                alert("Incorrect Password! Access Denied.");
+                alert("Denied!");
                 document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:50px;'>UNAUTHORIZED ACCESS</h1>";
-                window.stop(); 
+                window.stop();
             } else {
                 document.getElementById('admin-content').style.display = 'block';
             }
@@ -21,32 +21,33 @@
 
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    
+
     <style>
-        :root { --cyan: #00BFFF; --pink: #FF1493; --dark: #1a1a1a; --success: #28a745; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
+        :root { --blue: #00BFFF; --pink: #FF1493; --green: #28a745; --red: #dc3545; --dark: #1a1a1a; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; padding: 20px; }
         .container { max-width: 1000px; margin: 0 auto; }
-        header { background: var(--dark); color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 25px; }
+        h2 { border-left: 5px solid var(--blue); padding-left: 15px; font-size: 18px; color: #333; margin-bottom: 20px; }
         
-        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 25px; }
-        h2 { border-left: 5px solid var(--cyan); padding-left: 15px; margin-bottom: 20px; color: #333; font-size: 20px; }
+        .flex-row { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+        input { flex: 1; min-width: 150px; padding: 12px; border: 1px solid #ddd; border-radius: 6px; }
         
-        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
-        input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        button { cursor: pointer; padding: 10px 15px; border: none; border-radius: 6px; font-weight: bold; transition: 0.3s; font-size: 13px; }
-        
-        .btn-save { background: var(--cyan); color: white; width: 100%; padding: 15px; margin-top: 10px; }
-        .btn-add { background: var(--pink); color: white; margin-top: 10px; }
-        .btn-confirm { background: var(--success); color: white; }
-        .btn-delete { background: #dc3545; color: white; }
-        .btn-edit { background: #ffc107; color: #000; }
+        button { cursor: pointer; padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; transition: 0.3s; }
+        .btn-update { background: var(--blue); color: white; width: 100%; margin-top: 10px; }
+        .btn-add { background: var(--pink); color: white; }
+        .btn-approve { background: var(--green); color: white; }
+        .btn-reject { background: var(--red); color: white; }
+        .btn-edit { background: #ffc107; color: black; }
+        .btn-del { background: #eee; color: red; border: 1px solid red; }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
-        th, td { padding: 12px; border: 1px solid #eee; text-align: left; font-size: 14px; }
-        th { background: #f8f9fa; }
-
-        .req-card { border-bottom: 1px solid #eee; padding: 15px 0; display: flex; justify-content: space-between; align-items: center; }
-        .action-group { display: flex; gap: 8px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px; border: 1px solid #eee; text-align: left; }
+        th { background: #fafafa; font-size: 14px; }
+        
+        .gallery-preview { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
+        .img-box { position: relative; width: 100px; height: 80px; border: 1px solid #ddd; padding: 2px; border-radius: 5px; }
+        .img-box img { width: 100%; height: 100%; object-fit: cover; }
+        .img-box .del-x { position: absolute; top: -5px; right: -5px; background: red; color: white; border-radius: 50%; width: 20px; height: 20px; text-align: center; cursor: pointer; font-size: 12px; }
     </style>
 </head>
 
@@ -54,58 +55,52 @@
 
 <div id="admin-content" style="display:none;">
     <div class="container">
-        <header>
-            <h1>ARK ARCHIVE ADMIN</h1>
-            <div id="status-indicator" style="color: #00ff00;">● System Active</div>
-        </header>
+        <h1 style="text-align:center; color: var(--dark);">ARK ARCHIVE MASTER PANEL</h1>
 
         <div class="card">
-            <h2>Section 1: Live Stats Control</h2>
-            <div class="grid-3">
-                <div><label>Collected ($)</label><input type="number" id="input-collected"></div>
-                <div><label>Trees Bought</label><input type="number" id="input-bought"></div>
-                <div><label>Handed Over</label><input type="number" id="input-delivered"></div>
+            <h2>Section 1: Live Stats Control (Edit Mode)</h2>
+            <div class="flex-row">
+                <div><label>Collected ($)</label><input type="number" id="s-collected"></div>
+                <div><label>Trees Bought</label><input type="number" id="s-bought"></div>
+                <div><label>Handed Over</label><input type="number" id="s-delivered"></div>
             </div>
-            <button class="btn-save" onclick="updateStats()">UPDATE LIVE STATS</button>
+            <button class="btn-update" onclick="updateStats()">SAVE & SYNC STATS</button>
         </div>
 
         <div class="card">
-            <h2>Section 2: Mission Gallery (Image & Web Link)</h2>
-            <div style="display: flex; gap: 10px;">
-                <input type="text" id="gallery-url" placeholder="Paste Image URL...">
-                <input type="text" id="gallery-web-link" placeholder="Paste Destination/Social Link...">
+            <h2>Section 2: Mission Gallery (Image & Website Link)</h2>
+            <div class="flex-row">
+                <input type="text" id="gal-img" placeholder="Paste Image URL here...">
+                <input type="text" id="gal-link" placeholder="Paste Website Redirect Link...">
+                <button class="btn-add" onclick="addGallery()">ADD TO MISSION</button>
             </div>
-            <button class="btn-add" onclick="addToGallery()">ADD TO GALLERY</button>
-            <div id="gallery-list" style="margin-top:15px; display: flex; gap: 10px; flex-wrap: wrap;"></div>
+            <div id="gallery-display" class="gallery-preview"></div>
         </div>
 
         <div class="card">
-            <h2>Section 3: Legacy Archive (Donor Management)</h2>
-            <div class="grid-3">
-                <input type="text" id="donor-name" placeholder="Donor Name">
-                <input type="text" id="donor-photo" placeholder="Photo URL">
-                <input type="text" id="donor-link" placeholder="Social Link">
+            <h2>Section 3: Legacy Archive (Donor Info & Edit)</h2>
+            <div class="flex-row">
+                <input type="text" id="d-name" placeholder="Donor Name">
+                <input type="number" id="d-trees" placeholder="Trees Count">
+                <input type="text" id="d-photo" placeholder="Photo URL">
+                <input type="hidden" id="edit-id">
+                <button class="btn-add" id="d-btn" onclick="saveDonor()">SAVE DONOR</button>
             </div>
-            <input type="number" id="donor-trees" placeholder="Number of Trees">
-            <input type="hidden" id="edit-donor-id">
-            <button id="donor-btn" class="btn-add" style="background: var(--cyan);" onclick="saveToArchive()">ADD TO LEGACY GRID</button>
-            
-            <table id="archive-table">
-                <thead>
-                    <tr><th>Name</th><th>Trees</th><th>Actions</th></tr>
-                </thead>
-                <tbody></tbody>
+            <table>
+                <thead><tr><th>Name</th><th>Trees</th><th>Actions</th></tr></thead>
+                <tbody id="donor-list"></tbody>
             </table>
         </div>
 
         <div class="card">
             <h2>Section 4: Recent Donation Requests</h2>
-            <div id="request-list">Loading...</div>
+            <div id="req-list">Loading requests...</div>
         </div>
     </div>
 </div>
 
 <script>
+    // Firebase Config (Verified)
     const firebaseConfig = {
         apiKey: "AIzaSyCAdnfu2R82xbC7H85n_9mvQBE58X3TjbA",
         authDomain: "the-5k-elite-legacy.firebaseapp.com",
@@ -118,113 +113,120 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // --- 1. Stats Logic ---
+    // --- SECTION 1 LOGIC ---
     db.ref('stats').on('value', snap => {
         const d = snap.val() || { collected: 0, bought: 0, delivered: 0 };
-        document.getElementById('input-collected').value = d.collected;
-        document.getElementById('input-bought').value = d.bought;
-        document.getElementById('input-delivered').value = d.delivered;
+        document.getElementById('s-collected').value = d.collected;
+        document.getElementById('s-bought').value = d.bought;
+        document.getElementById('s-delivered').value = d.delivered;
     });
     function updateStats() {
-        db.ref('stats').set({
-            collected: parseInt(document.getElementById('input-collected').value) || 0,
-            bought: parseInt(document.getElementById('input-bought').value) || 0,
-            delivered: parseInt(document.getElementById('input-delivered').value) || 0
-        }).then(() => alert("Stats Updated!"));
+        db.ref('stats').update({
+            collected: parseInt(document.getElementById('s-collected').value) || 0,
+            bought: parseInt(document.getElementById('s-bought').value) || 0,
+            delivered: parseInt(document.getElementById('s-delivered').value) || 0
+        }).then(() => alert("Stats Updated Successfully!"));
     }
 
-    // --- 2. Gallery Logic ---
-    function addToGallery() {
-        const img = document.getElementById('gallery-url').value;
-        const web = document.getElementById('gallery-web-link').value;
-        if(img && web) {
-            db.ref('gallery').push({ image: img, link: web });
-            document.getElementById('gallery-url').value = '';
-            document.getElementById('gallery-web-link').value = '';
-        }
+    // --- SECTION 2 LOGIC ---
+    function addGallery() {
+        const img = document.getElementById('gal-img').value;
+        const link = document.getElementById('gal-link').value;
+        if(img && link) {
+            db.ref('mission_gallery').push({ image: img, url: link });
+            document.getElementById('gal-img').value = '';
+            document.getElementById('gal-link').value = '';
+        } else { alert("Please fill both URL boxes!"); }
     }
-    db.ref('gallery').on('value', snap => {
-        const list = document.getElementById('gallery-list');
-        list.innerHTML = '';
+    db.ref('mission_gallery').on('value', snap => {
+        const display = document.getElementById('gallery-display');
+        display.innerHTML = '';
         snap.forEach(child => {
             const data = child.val();
-            list.innerHTML += `<div style="position:relative; border:1px solid #ddd; padding:5px; border-radius:5px;">
-                <img src="${data.image}" width="80" height="60" style="object-fit:cover;">
-                <br><button class="btn-delete" style="padding:2px 5px; font-size:10px;" onclick="deleteItem('gallery/${child.key}')">Remove</button>
-            </div>`;
+            display.innerHTML += `
+                <div class="img-box">
+                    <img src="${data.image}" title="Link: ${data.url}">
+                    <div class="del-x" onclick="removeData('mission_gallery/${child.key}')">×</div>
+                </div>`;
         });
     });
 
-    // --- 3. Legacy Archive Logic (Add & Edit) ---
-    function saveToArchive() {
-        const id = document.getElementById('edit-donor-id').value;
-        const data = {
-            name: document.getElementById('donor-name').value,
-            photo: document.getElementById('donor-photo').value,
-            link: document.getElementById('donor-link').value,
-            trees: document.getElementById('donor-trees').value
-        };
+    // --- SECTION 3 LOGIC (EDIT/SAVE) ---
+    function saveDonor() {
+        const name = document.getElementById('d-name').value;
+        const trees = document.getElementById('d-trees').value;
+        const photo = document.getElementById('d-photo').value;
+        const id = document.getElementById('edit-id').value;
+
+        const donorData = { name, trees, photo };
         if(id) {
-            db.ref('legacy_archive/' + id).update(data);
-            document.getElementById('edit-donor-id').value = "";
-            document.getElementById('donor-btn').innerText = "ADD TO LEGACY GRID";
+            db.ref('legacy_archive/' + id).update(donorData);
+            document.getElementById('edit-id').value = '';
+            document.getElementById('d-btn').innerText = "SAVE DONOR";
         } else {
-            db.ref('legacy_archive').push(data);
+            db.ref('legacy_archive').push(donorData);
         }
-        alert("Success!");
+        // Clear Inputs
+        document.getElementById('d-name').value = '';
+        document.getElementById('d-trees').value = '';
+        document.getElementById('d-photo').value = '';
     }
+
     db.ref('legacy_archive').on('value', snap => {
-        const tbody = document.querySelector('#archive-table tbody');
-        tbody.innerHTML = '';
+        const list = document.getElementById('donor-list');
+        list.innerHTML = '';
         snap.forEach(child => {
             const d = child.val();
-            tbody.innerHTML += `<tr>
-                <td>${d.name}</td><td>${d.trees}</td>
-                <td>
-                    <button class="btn-edit" onclick="editDonor('${child.key}')">Edit</button>
-                    <button class="btn-delete" onclick="deleteItem('legacy_archive/${child.key}')">Del</button>
-                </td>
-            </tr>`;
+            list.innerHTML += `
+                <tr>
+                    <td>${d.name}</td>
+                    <td>${d.trees}</td>
+                    <td>
+                        <button class="btn-edit" onclick="setEditDonor('${child.key}', '${d.name}', '${d.trees}', '${d.photo}')">Edit</button>
+                        <button class="btn-del" onclick="removeData('legacy_archive/${child.key}')">Del</button>
+                    </td>
+                </tr>`;
         });
     });
-    function editDonor(key) {
-        db.ref('legacy_archive/' + key).once('value', snap => {
-            const d = snap.val();
-            document.getElementById('donor-name').value = d.name;
-            document.getElementById('donor-photo').value = d.photo;
-            document.getElementById('donor-link').value = d.link;
-            document.getElementById('donor-trees').value = d.trees;
-            document.getElementById('edit-donor-id').value = key;
-            document.getElementById('donor-btn').innerText = "UPDATE DONOR INFO";
-        });
+
+    function setEditDonor(key, name, trees, photo) {
+        document.getElementById('d-name').value = name;
+        document.getElementById('d-trees').value = trees;
+        document.getElementById('d-photo').value = photo;
+        document.getElementById('edit-id').value = key;
+        document.getElementById('d-btn').innerText = "UPDATE NOW";
     }
 
-    // --- 4. Donation Requests Logic (Confirm & Delete) ---
+    // --- SECTION 4 LOGIC (APPROVE/REJECT) ---
     db.ref('donation_requests').on('value', snap => {
-        const reqList = document.getElementById('request-list');
-        reqList.innerHTML = snap.exists() ? '' : '<p>No pending requests.</p>';
+        const reqDiv = document.getElementById('req-list');
+        reqDiv.innerHTML = '';
+        if(!snap.exists()) reqDiv.innerHTML = "No pending requests.";
         snap.forEach(child => {
             const r = child.val();
-            reqList.innerHTML += `
-                <div class="req-card">
-                    <div><strong>${r.name}</strong> - ${r.qty} trees</div>
-                    <div class="action-group">
-                        <button class="btn-confirm" onclick="confirmRequest('${child.key}', '${r.name}', ${r.qty})">Confirm</button>
-                        <button class="btn-delete" onclick="deleteItem('donation_requests/${child.key}')">Delete</button>
+            reqDiv.innerHTML += `
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:10px;">
+                    <div><strong>${r.name}</strong> wants to plant ${r.qty} trees</div>
+                    <div style="display:flex; gap:5px;">
+                        <button class="btn-approve" onclick="approveReq('${child.key}', '${r.name}', '${r.qty}')">Approve</button>
+                        <button class="btn-reject" onclick="removeData('donation_requests/${child.key}')">Reject</button>
                     </div>
                 </div>`;
         });
     });
-    function confirmRequest(key, name, qty) {
-        if(confirm("Confirm this donation? This will remove it from requests.")) {
-            // এখানে আপনি চাইলে ডোনার আর্কাইভে অটো পাঠানোর লজিক দিতে পারেন
-            deleteItem('donation_requests/' + key);
-        }
+
+    function approveReq(key, name, qty) {
+        // Approve করলে এটি সরাসরি লিগ্যাসি আর্কাইভে চলে যাবে
+        db.ref('legacy_archive').push({ name: name, trees: qty, photo: '' });
+        db.ref('donation_requests/' + key).remove();
+        alert("Approved and Added to Archive!");
     }
 
-    function deleteItem(path) {
+    // Universal Remove
+    function removeData(path) {
         if(confirm("Are you sure?")) db.ref(path).remove();
     }
 </script>
+
 </body>
 </html>
