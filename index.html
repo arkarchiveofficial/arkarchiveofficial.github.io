@@ -204,6 +204,7 @@
     <div id="payment-drawer">
         <h2 style="font-family:'Montserrat'; margin-bottom:25px;">DONATION PORTAL</h2>
         <input type="text" id="custName" class="pay-input" placeholder="DONOR FULL NAME">
+        <input type="email" id="custEmail" class="pay-input" placeholder="CUSTOMER EMAIL ADDRESS">
         <input type="number" id="treeQty" class="pay-input" placeholder="NUMBER OF TREES">
         <button onclick="submitDonation()" style="width:100%; padding:18px; background:var(--pink); color:#fff; border:none; border-radius:8px; font-weight:900; cursor:pointer;">SUBMIT & VIEW ADDRESSES</button>
 
@@ -275,7 +276,7 @@
             document.getElementById('stat-handed').innerText = data.delivered;
         });
 
-        // ২. গ্যালারি লোড (Synced with Admin Delete/Upload)
+        // ২. গ্যালারি লোড (Clickable Links for Images)
         db.ref('gallery').on('value', snapshot => {
             const gallery = document.getElementById('main-gallery');
             gallery.innerHTML = '';
@@ -283,10 +284,21 @@
                 snapshot.forEach(child => {
                     const item = child.val();
                     const finalImg = (typeof item === 'object') ? item.image : item; 
-                    gallery.innerHTML += `
-                        <div class="gallery-item">
-                            <img src="${finalImg}" onerror="this.src='https://via.placeholder.com/500?text=Image+Error'">
-                        </div>`;
+                    const redirectLink = (typeof item === 'object') ? item.link : null;
+
+                    if (redirectLink && redirectLink !== "") {
+                        gallery.innerHTML += `
+                            <div class="gallery-item">
+                                <a href="${redirectLink}" target="_blank" style="display:block; width:100%; height:100%;">
+                                    <img src="${finalImg}" onerror="this.src='https://via.placeholder.com/500?text=Image+Error'">
+                                </a>
+                            </div>`;
+                    } else {
+                        gallery.innerHTML += `
+                            <div class="gallery-item">
+                                <img src="${finalImg}" onerror="this.src='https://via.placeholder.com/500?text=Image+Error'">
+                            </div>`;
+                    }
                 });
             } else {
                 for(let i=1; i<=8; i++) {
@@ -351,14 +363,20 @@
         function closeCongrats() { document.getElementById('congrats-popup').classList.remove('active'); }
         function copy(t) { navigator.clipboard.writeText(t).then(() => alert("Copied: " + t)); }
 
-        // ৫. ডোনেশন রিকোয়েস্ট (এডমিন প্যানেলে যাবে)
+        // ৫. ডোনেশন রিকোয়েস্ট (Updated: Includes Email & Validation)
         function submitDonation() {
             const name = document.getElementById('custName').value;
+            const email = document.getElementById('custEmail').value;
             const qty = document.getElementById('treeQty').value;
-            if(!name || !qty) return alert("Please enter name and tree quantity.");
+            
+            // Validation: All three fields must be filled
+            if(!name || !email || !qty) {
+                return alert("Please enter donor name, email address, and tree quantity.");
+            }
             
             db.ref('donation_requests').push({
                 name: name,
+                email: email, // Sending email to Database
                 qty: qty,
                 timestamp: Date.now()
             }).then(() => {
