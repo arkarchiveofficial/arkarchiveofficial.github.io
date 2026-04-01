@@ -24,12 +24,7 @@
         .nav-brand { font-family: 'Montserrat'; font-weight: 900; font-size: 24px; letter-spacing: 1px; flex-shrink: 0; }
         
         .nav-stats {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-            justify-content: center;
-            flex-grow: 1;
-            margin: 0 15px;
+            display: flex; gap: 20px; align-items: center; justify-content: center; flex-grow: 1; margin: 0 15px;
         }
         .stat-item { text-align: center; }
         .stat-number { display: block; font-family: 'Montserrat'; font-weight: 900; font-size: 16px; color: var(--pink); line-height: 1; }
@@ -276,7 +271,6 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // ১. স্ট্যাটাস লোড
         db.ref('stats').on('value', snapshot => {
             const data = snapshot.val() || { collected: 0, bought: 0, delivered: 0 };
             document.getElementById('stat-donation').innerText = '$' + data.collected;
@@ -284,7 +278,6 @@
             document.getElementById('stat-handed').innerText = data.delivered;
         });
 
-        // ২. গ্যালারি লোড
         db.ref('gallery').on('value', snapshot => {
             const data = snapshot.val();
             if(data) {
@@ -296,7 +289,6 @@
             }
         });
 
-        // ৩. লিগ্যাসি গ্রিড
         const grid = document.getElementById('infiniteGrid');
         let plotCount = 0;
 
@@ -305,16 +297,13 @@
                 const donors = snapshot.val();
                 grid.innerHTML = '';
                 plotCount = 0;
-                
                 if(donors) {
                     Object.values(donors).forEach(d => {
                         plotCount++;
                         grid.innerHTML += `
                         <div class="donor-container">
                             <a href="${d.link || '#'}" target="_blank" style="text-decoration:none;">
-                                <div class="donor-circle">
-                                    <img src="${d.photo || 'https://via.placeholder.com/100'}">
-                                </div>
+                                <div class="donor-circle"><img src="${d.photo || 'https://via.placeholder.com/100'}"></div>
                                 <span class="donor-name">${d.name}</span>
                                 <span class="donor-qty">${d.trees || 0} Trees</span>
                             </a>
@@ -330,9 +319,7 @@
                 plotCount++;
                 grid.innerHTML += `
                 <div class="donor-container">
-                    <div class="donor-circle">
-                        <i class="fas fa-tree" style="opacity:0.2; font-size:24px;"></i>
-                    </div>
+                    <div class="donor-circle"><i class="fas fa-tree" style="opacity:0.2; font-size:24px;"></i></div>
                     <span class="donor-name" style="opacity:0.3;">Plot #${plotCount}</span>
                 </div>`;
             }
@@ -350,12 +337,22 @@
         function closeCongrats() { document.getElementById('congrats-popup').classList.remove('active'); }
         function copy(t) { navigator.clipboard.writeText(t).then(() => alert("Copied: " + t)); }
 
+        // সাবমিট ফাংশন উইথ ইমেইল ভ্যালিডেশন
         function submitDonation() {
             const name = document.getElementById('custName').value;
             const qty = document.getElementById('treeQty').value;
             const email = document.getElementById('custEmail').value;
 
-            if(!name || !qty || !email) return alert("Please enter name, tree quantity, and email.");
+            // ইমেইল চেক করার জন্য রিজেক্স (Regex) লজিক
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            if(!name || !qty || !email) {
+                return alert("Please fill in all fields (Name, Quantity, and Email).");
+            }
+
+            if(!emailPattern.test(email)) {
+                return alert("Invalid Email! Please include '@' and a domain (e.g., .com, .net).");
+            }
             
             db.ref('donation_requests').push({
                 name: name,
