@@ -267,7 +267,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // ১. স্ট্যাটাস লোড
+        // ১. স্ট্যাটাস লোড (Manual Update Sync)
         db.ref('stats').on('value', snapshot => {
             const data = snapshot.val() || { collected: 0, bought: 0, delivered: 0 };
             document.getElementById('stat-donation').innerText = '$' + data.collected;
@@ -275,14 +275,13 @@
             document.getElementById('stat-handed').innerText = data.delivered;
         });
 
-        // ২. গ্যালারি লোড (Updated Logic)
+        // ২. গ্যালারি লোড (Synced with Admin Delete/Upload)
         db.ref('gallery').on('value', snapshot => {
-            const data = snapshot.val();
             const gallery = document.getElementById('main-gallery');
             gallery.innerHTML = '';
-            
-            if(data) {
-                Object.values(data).forEach(item => {
+            if(snapshot.exists()) {
+                snapshot.forEach(child => {
+                    const item = child.val();
                     const finalImg = (typeof item === 'object') ? item.image : item; 
                     gallery.innerHTML += `
                         <div class="gallery-item">
@@ -290,31 +289,30 @@
                         </div>`;
                 });
             } else {
-                // Default placeholders if empty
                 for(let i=1; i<=8; i++) {
                     gallery.innerHTML += `<div class="gallery-item"><img src="https://via.placeholder.com/500x500?text=Activity+${i}"></div>`;
                 }
             }
         });
 
-        // ৩. লিগ্যাসি গ্রিড
+        // ৩. লিগ্যাসি গ্রিড (Automatic Update from Admin Approval)
         const grid = document.getElementById('infiniteGrid');
-        let plotCount = 0;
+        let currentRealPlots = 0;
 
         function loadLegacyData() {
             db.ref('legacy_archive').on('value', snapshot => {
-                const donors = snapshot.val();
                 grid.innerHTML = '';
-                plotCount = 0;
+                currentRealPlots = 0;
                 
-                if(donors) {
-                    Object.values(donors).forEach(d => {
-                        plotCount++;
+                if(snapshot.exists()) {
+                    snapshot.forEach(child => {
+                        const d = child.val();
+                        currentRealPlots++;
                         grid.innerHTML += `
                         <div class="donor-container">
                             <a href="${d.link || '#'}" target="_blank" style="text-decoration:none;">
                                 <div class="donor-circle">
-                                    <img src="${d.photo || 'https://via.placeholder.com/100'}">
+                                    <img src="${d.photo || 'https://via.placeholder.com/100'}" onerror="this.src='https://via.placeholder.com/100'">
                                 </div>
                                 <span class="donor-name">${d.name}</span>
                                 <span class="donor-qty">${d.trees || 0} Trees</span>
@@ -327,22 +325,24 @@
         }
 
         function addDemoPlots(count) {
+            let totalShow = currentRealPlots;
             for(let i=0; i<count; i++) {
-                plotCount++;
+                totalShow++;
                 grid.innerHTML += `
                 <div class="donor-container">
                     <div class="donor-circle">
                         <i class="fas fa-tree" style="opacity:0.2; font-size:24px;"></i>
                     </div>
-                    <span class="donor-name" style="opacity:0.3;">Plot #${plotCount}</span>
+                    <span class="donor-name" style="opacity:0.3;">Plot #${totalShow}</span>
                 </div>`;
             }
         }
 
         window.onload = loadLegacyData;
 
+        // ৪. ইনফিনিট স্ক্রল (ডিজাইন ঠিক রেখে)
         window.addEventListener('scroll', () => {
-            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
+            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 800) {
                 addDemoPlots(24);
             }
         });
@@ -351,6 +351,7 @@
         function closeCongrats() { document.getElementById('congrats-popup').classList.remove('active'); }
         function copy(t) { navigator.clipboard.writeText(t).then(() => alert("Copied: " + t)); }
 
+        // ৫. ডোনেশন রিকোয়েস্ট (এডমিন প্যানেলে যাবে)
         function submitDonation() {
             const name = document.getElementById('custName').value;
             const qty = document.getElementById('treeQty').value;
@@ -360,13 +361,15 @@
                 name: name,
                 qty: qty,
                 timestamp: Date.now()
+            }).then(() => {
+                document.getElementById('payment-list').style.display = 'block';
+                document.getElementById('congrats-title').innerText = "Congratulations, " + name + "!";
+                document.getElementById('congrats-desc').innerText = "You've successfully requested to plant " + qty + " trees!";
+                document.getElementById('congrats-popup').classList.add('active');
+                confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 } });
+            }).catch(err => {
+                alert("Submission failed: " + err.message);
             });
-
-            document.getElementById('payment-list').style.display = 'block';
-            document.getElementById('congrats-title').innerText = "Congratulations, " + name + "!";
-            document.getElementById('congrats-desc').innerText = "You've successfully requested to plant " + qty + " trees!";
-            document.getElementById('congrats-popup').classList.add('active');
-            confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 } });
         }
     </script>
 </body>
