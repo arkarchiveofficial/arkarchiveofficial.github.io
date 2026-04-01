@@ -75,11 +75,9 @@
         <h3>🖼 Section 2: Mission Progress Gallery</h3>
         <div class="input-row">
             <input type="text" id="gal-img" placeholder="Paste Photo URL (Direct Link)">
-            <input type="text" id="gal-link" placeholder="Destination URL (FB/Web)">
             <button style="background: var(--accent); color: white;" onclick="addGallery()">UPLOAD TO GALLERY</button>
         </div>
-        <div class="gallery-grid" id="gallery-list">
-            </div>
+        <div class="gallery-grid" id="gallery-list"></div>
     </div>
 
     <div class="card">
@@ -135,15 +133,14 @@
         }).then(() => alert("Stats Synced Successfully!"));
     }
 
-    // 2. Gallery Logic (Grid View Update)
+    // 2. Gallery Logic (শুধুমাত্র ছবি আপলোড হবে)
     function addGallery() {
         const img = document.getElementById('gal-img').value;
-        const link = document.getElementById('gal-link').value || "#";
         if(img) {
-            db.ref('gallery').push({ image: img, link: link }).then(() => {
+            // লিঙ্ক অপশনটি সরিয়ে শুধু ছবি পাঠানো হচ্ছে
+            db.ref('gallery').push({ image: img, link: "#" }).then(() => {
                 alert("Image added to Mission Gallery!");
                 document.getElementById('gal-img').value = '';
-                document.getElementById('gal-link').value = '';
             });
         } else { alert("Please paste an image URL"); }
     }
@@ -161,7 +158,7 @@
         });
     });
 
-    // 3. Legacy Archive (Edit/Save)
+    // 3. Legacy Archive
     function saveDonor() {
         const key = document.getElementById('edit-key').value;
         const data = {
@@ -206,7 +203,7 @@
         document.getElementById('save-donor-btn').innerText = "UPDATE DONOR INFO";
     }
 
-    // 4. Donation Request Logic
+    // 4. Donation Request
     db.ref('donation_requests').on('value', snap => {
         const list = document.getElementById('req-list');
         list.innerHTML = '';
