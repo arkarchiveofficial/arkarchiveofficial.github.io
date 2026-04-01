@@ -65,7 +65,6 @@
         .info-card h3 { font-family: 'Montserrat'; font-weight: 900; color: var(--cyan); margin-bottom: 15px; text-transform: uppercase; }
         .info-card p { line-height: 1.8; color: #444; font-size: 15px; margin-bottom: 10px; }
 
-        /* গ্যালারি ডিজাইন ইমপ্রুভমেন্ট */
         .gallery-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; width: 100%; max-width: 1200px; margin-top: 40px; }
         .gallery-item { width: 100%; aspect-ratio: 1/1; background: #eee; border-radius: 15px; overflow: hidden; }
         .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
@@ -102,8 +101,11 @@
 
     <div class="fixed-social-bar">
         <a href="https://wa.me/8801576940717" target="_blank" class="side-icon" title="Support"><i class="fab fa-whatsapp"></i></a>
-        <span class="support-label">Customer Support<br>24/7</span>
+        <span class="support-label">Support<br>24/7</span>
         
+        <a href="mailto:arkarchiveofficial@gmail.com" target="_blank" class="side-icon" title="Email Support"><i class="fas fa-envelope"></i></a>
+        <span class="support-label">Official<br>Mail</span>
+
         <a href="https://facebook.com/arkarchiveofficial" target="_blank" class="side-icon"><i class="fab fa-facebook-f"></i></a>
         <a href="https://instagram.com/arkarchiveofficial" target="_blank" class="side-icon"><i class="fab fa-instagram"></i></a>
         <a href="https://youtube.com/@ArkArchiveOfficial" target="_blank" class="side-icon"><i class="fab fa-youtube"></i></a>
@@ -203,7 +205,7 @@
         <div style="text-align:left; background:#f9f9f9; padding:20px; border-radius:10px; font-size:14px; line-height:1.6; border-left:5px solid var(--cyan);">
             <strong>Next Steps:</strong><br>
             1. Complete your payment using the provided addresses.<br>
-            2. After payment, click the WhatsApp icon below to contact <strong>Customer Support</strong>.<br>
+            2. After payment, contact <strong>Customer Support</strong> via WhatsApp or Email.<br>
             3. Provide your <strong>Name, Photo, and Social Media/Website link</strong> for your plot.<br>
             4. Confirm the number of trees donated.
         </div>
@@ -214,6 +216,8 @@
         <h2 style="font-family:'Montserrat'; margin-bottom:25px;">DONATION PORTAL</h2>
         <input type="text" id="custName" class="pay-input" placeholder="DONOR FULL NAME">
         <input type="number" id="treeQty" class="pay-input" placeholder="NUMBER OF TREES">
+        <input type="email" id="custEmail" class="pay-input" placeholder="YOUR EMAIL ADDRESS">
+        
         <button onclick="submitDonation()" style="width:100%; padding:18px; background:var(--pink); color:#fff; border:none; border-radius:8px; font-weight:900; cursor:pointer;">SUBMIT & VIEW ADDRESSES</button>
 
         <div id="payment-list" style="display:none; margin-top:30px;">
@@ -238,14 +242,11 @@
             <div class="pay-card" style="border: 2px dashed var(--cyan); cursor: default;">
                 <h4 style="color:var(--cyan); margin-bottom:10px;">Bank Transfer (SWIFT)</h4>
                 <div style="font-size:12px; text-align: left; line-height: 1.6;">
-                    <p><strong>Account Holder:</strong> [ Enter Name ]</p>
-                    <p><strong>Account Number:</strong> [ Enter Number ]</p>
-                    <p><strong>Bank:</strong> [ Enter Bank Name ]</p>
-                    <p><strong>Branch:</strong> [ Enter Branch ]</p>
-                    <p><strong>Routing No:</strong> [ Enter Routing ]</p>
-                    <p><strong>SWIFT Code:</strong> [ Enter SWIFT ]</p>
+                    <p><strong>Account Holder:</strong> ARK ARCHIVE</p>
+                    <p><strong>Account Number:</strong> [ Details Soon ]</p>
+                    <p><strong>Bank:</strong> [ Details Soon ]</p>
                 </div>
-                <span class="method-info" style="margin-top:10px; border-top: 1px solid #ddd; padding-top: 5px;">Direct bank wire for official records. (Details coming soon)</span>
+                <span class="method-info" style="margin-top:10px; border-top: 1px solid #ddd; padding-top: 5px;">Direct bank wire for official records.</span>
             </div>
 
             <div class="pay-card" onclick="copy('912221034')">
@@ -263,7 +264,6 @@
     </div>
 
     <script>
-        // --- Firebase Configuration ---
         const firebaseConfig = {
             apiKey: "AIzaSyCAdnfu2R82xbC7H85n_9mvQBE58X3TjbA",
             authDomain: "the-5k-elite-legacy.firebaseapp.com",
@@ -276,7 +276,6 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // ১. স্ট্যাটাস লোড
         db.ref('stats').on('value', snapshot => {
             const data = snapshot.val() || { collected: 0, bought: 0, delivered: 0 };
             document.getElementById('stat-donation').innerText = '$' + data.collected;
@@ -284,7 +283,6 @@
             document.getElementById('stat-handed').innerText = data.delivered;
         });
 
-        // ২. গ্যালারি লোড (Square Crop Support)
         db.ref('gallery').on('value', snapshot => {
             const data = snapshot.val();
             if(data) {
@@ -296,7 +294,6 @@
             }
         });
 
-        // ৩. লিগ্যাসি গ্রিড (Link Support & Tree Quantity Support)
         const grid = document.getElementById('infiniteGrid');
         let plotCount = 0;
 
@@ -309,7 +306,6 @@
                 if(donors) {
                     Object.values(donors).forEach(d => {
                         plotCount++;
-                        // লিঙ্ক এবং ডোনেশন পরিমাণ এখানে যোগ করা হয়েছে
                         grid.innerHTML += `
                         <div class="donor-container">
                             <a href="${d.link || '#'}" target="_blank" style="text-decoration:none;">
@@ -354,11 +350,14 @@
         function submitDonation() {
             const name = document.getElementById('custName').value;
             const qty = document.getElementById('treeQty').value;
-            if(!name || !qty) return alert("Please enter name and tree quantity.");
+            const email = document.getElementById('custEmail').value;
+            
+            if(!name || !qty || !email) return alert("Please fill in all fields (Name, Quantity, and Email).");
             
             db.ref('donation_requests').push({
                 name: name,
                 qty: qty,
+                email: email,
                 timestamp: Date.now()
             });
 
