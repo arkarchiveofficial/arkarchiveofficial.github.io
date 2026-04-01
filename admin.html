@@ -11,85 +11,102 @@
     <style>
         :root { --primary: #00BFFF; --accent: #FF1493; --dark: #121212; --success: #28a745; --danger: #dc3545; }
         body { font-family: 'Inter', sans-serif; background: #f0f2f5; margin: 0; display: flex; }
-        .sidebar { width: 260px; height: 100vh; background: var(--dark); color: white; position: fixed; padding: 20px; }
-        .main-content { margin-left: 260px; width: calc(100% - 260px); padding: 40px; }
-        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; border-top: 5px solid var(--primary); }
-        h3 { margin-top: 0; color: #333; border-left: 4px solid var(--primary); padding-left: 10px; }
         
-        /* Input & Button */
-        .input-row { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
-        input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; min-width: 200px; }
-        button { cursor: pointer; border: none; border-radius: 6px; font-weight: bold; transition: 0.2s; padding: 12px 20px; }
-        .btn-upload { background: var(--accent); color: white; min-width: 150px; }
-        .btn-save { background: var(--primary); color: white; width: 100%; margin-top: 10px; font-size: 16px; }
+        /* Sidebar */
+        .sidebar { width: 260px; height: 100vh; background: var(--dark); color: white; position: fixed; padding: 20px; box-sizing: border-box; }
+        .sidebar h2 { color: var(--primary); font-size: 22px; border-bottom: 1px solid #333; padding-bottom: 15px; }
 
-        /* Gallery Preview Grid */
-        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; margin-top: 20px; }
-        .gal-card { position: relative; border-radius: 10px; overflow: hidden; height: 120px; border: 2px solid #eee; background: #fff; }
-        .gal-card img { width: 100%; height: 100%; object-fit: cover; }
-        .del-btn { position: absolute; top: 5px; right: 5px; background: rgba(255,0,0,0.8); color: white; border: none; border-radius: 4px; padding: 2px 8px; cursor: pointer; font-size: 12px; }
+        /* Main Content */
+        .main-content { margin-left: 260px; width: calc(100% - 260px); padding: 40px; box-sizing: border-box; }
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); margin-bottom: 30px; border-top: 4px solid var(--primary); }
+        h3 { margin-top: 0; color: #333; font-size: 18px; margin-bottom: 20px; }
+
+        /* Form Elements */
+        .input-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px; }
+        input { padding: 12px; border: 1px solid #ddd; border-radius: 8px; outline: none; width: 100%; box-sizing: border-box; transition: 0.3s; }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 5px rgba(0, 191, 255, 0.2); }
+        
+        button { cursor: pointer; border: none; border-radius: 6px; font-weight: bold; transition: 0.2s; padding: 10px 18px; }
+        .btn-save { background: var(--primary); color: white; width: 100%; padding: 15px; font-size: 16px; margin-top: 10px; }
+        .btn-save:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        /* Gallery Grid (As per your request) */
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; margin-top: 20px; }
+        .gal-item { position: relative; border-radius: 10px; overflow: hidden; height: 110px; border: 2px solid #eee; background: #000; }
+        .gal-item img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
+        .gal-del { position: absolute; top: 5px; right: 5px; background: var(--danger); color: white; border: none; border-radius: 4px; padding: 2px 8px; cursor: pointer; font-size: 12px; }
 
         /* Table */
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #eee; }
-        .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin-right: 10px; vertical-align: middle; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background: #f8f9fa; padding: 12px; text-align: left; color: #666; font-size: 14px; }
+        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin-right: 10px; vertical-align: middle; border: 1px solid #ddd; }
+        
+        .btn-edit { background: #ffc107; color: black; margin-right: 5px; }
+        .btn-delete { background: var(--danger); color: white; }
+        .btn-approve { background: var(--success); color: white; }
+
+        /* Request list */
+        .req-box { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #eee; background: #fff; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
     <h2>ARK ADMIN</h2>
-    <p style="color: #666; font-size: 13px; text-align: center;">Mission Control Center</p>
+    <p style="color: #666; font-size: 12px;">Active Project: ARK Archive</p>
+    <div style="margin-top: 50px; font-size: 14px; color: var(--primary);">● Connected to Cloud</div>
 </div>
 
 <div class="main-content">
-    <h1>ARK Archive Master Control</h1>
+    <h1>ARK Archive Control Panel</h1>
 
     <div class="card">
-        <h3>Section 1: Live Stats Control</h3>
+        <h3>📊 Section 1: Live Stats Counter</h3>
         <div class="input-row">
-            <input type="number" id="s-col" placeholder="Collected ($)">
-            <input type="number" id="s-bought" placeholder="Trees Bought">
-            <input type="number" id="s-deliv" placeholder="Handed Over">
+            <div><label style="font-size: 12px; color: #888;">Collected ($)</label><input type="number" id="s-col"></div>
+            <div><label style="font-size: 12px; color: #888;">Trees Bought</label><input type="number" id="s-bought"></div>
+            <div><label style="font-size: 12px; color: #888;">Handed Over</label><input type="number" id="s-deliv"></div>
         </div>
-        <button class="btn-save" onclick="updateStats()">UPDATE LIVE STATS</button>
+        <button class="btn-save" onclick="updateStats()">SYNC ALL STATS</button>
     </div>
 
     <div class="card">
-        <h3>Section 2: Mission Gallery (Image Links)</h3>
+        <h3>🖼 Section 2: Mission Progress Gallery</h3>
         <div class="input-row">
-            <input type="text" id="gal-img" placeholder="Paste Image URL here...">
-            <input type="text" id="gal-link" placeholder="Redirect Link (Optional)">
-            <button class="btn-upload" onclick="addGallery()">ADD TO GALLERY</button>
+            <input type="text" id="gal-img" placeholder="Paste Photo URL (Direct Link)">
+            <input type="text" id="gal-link" placeholder="Destination URL (FB/Web)">
+            <button style="background: var(--accent); color: white;" onclick="addGallery()">UPLOAD TO GALLERY</button>
         </div>
-        <div class="gallery-grid" id="gal-list">
+        <div class="gallery-grid" id="gallery-list">
             </div>
     </div>
 
     <div class="card">
-        <h3>Section 3: Legacy Archive Grid</h3>
+        <h3>🏆 Section 3: Legacy Archive (Donor Grid)</h3>
         <div class="input-row">
             <input type="text" id="d-name" placeholder="Donor Name">
-            <input type="number" id="d-trees" placeholder="Trees">
-            <input type="text" id="d-photo" placeholder="Photo URL">
+            <input type="number" id="d-trees" placeholder="Tree Count">
+            <input type="text" id="d-photo" placeholder="Donor Photo URL">
+            <input type="text" id="d-link" placeholder="Social Profile Link">
             <input type="hidden" id="edit-key">
         </div>
-        <button class="btn-save" id="donor-btn" style="background: #333;" onclick="saveDonor()">ADD TO ARCHIVE</button>
-        
-        <table id="donor-table">
-            <thead><tr><th>Donor</th><th>Qty</th><th>Action</th></tr></thead>
-            <tbody id="donor-tbody"></tbody>
+        <button class="btn-save" id="save-donor-btn" style="background: var(--dark);" onclick="saveDonor()">SAVE DONOR TO ARCHIVE</button>
+
+        <table>
+            <thead><tr><th>Donor Info</th><th>Trees</th><th>Actions</th></tr></thead>
+            <tbody id="donor-table-body"></tbody>
         </table>
     </div>
 
     <div class="card">
-        <h3>Section 4: Recent Donation Requests</h3>
-        <div id="request-container">Loading...</div>
+        <h3>✉ Section 4: Pending Donation Requests</h3>
+        <div id="req-list" style="color: #999; text-align: center; padding: 20px;">Scanning for requests...</div>
     </div>
 </div>
 
 <script>
-    // Firebase Configuration
+    // Firebase Config
     const firebaseConfig = {
         apiKey: "AIzaSyCAdnfu2R82xbC7H85n_9mvQBE58X3TjbA",
         authDomain: "the-5k-elite-legacy.firebaseapp.com",
@@ -102,7 +119,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 1. Stats Sync
+    // 1. Stats Logic
     db.ref('stats').on('value', snap => {
         const d = snap.val() || { collected: 0, bought: 0, delivered: 0 };
         document.getElementById('s-col').value = d.collected;
@@ -115,89 +132,93 @@
             collected: parseInt(document.getElementById('s-col').value) || 0,
             bought: parseInt(document.getElementById('s-bought').value) || 0,
             delivered: parseInt(document.getElementById('s-deliv').value) || 0
-        }).then(() => alert("Stats Updated Successfully!"));
+        }).then(() => alert("Stats Synced Successfully!"));
     }
 
-    // 2. Gallery Logic (With Delete Option like in your image)
+    // 2. Gallery Logic (Grid View)
     function addGallery() {
-        const url = document.getElementById('gal-img').value;
+        const img = document.getElementById('gal-img').value;
         const link = document.getElementById('gal-link').value || "#";
-        if(url) {
-            db.ref('gallery').push({ image: url, link: link }).then(() => {
+        if(img) {
+            db.ref('gallery').push({ image: img, link: link }).then(() => {
                 document.getElementById('gal-img').value = '';
                 document.getElementById('gal-link').value = '';
             });
-        }
+        } else { alert("Please paste an image URL"); }
     }
 
     db.ref('gallery').on('value', snap => {
-        const container = document.getElementById('gal-list');
-        container.innerHTML = '';
+        const list = document.getElementById('gallery-list');
+        list.innerHTML = '';
         snap.forEach(child => {
-            const data = child.val();
-            container.innerHTML += `
-                <div class="gal-card">
-                    <img src="${data.image}">
-                    <button class="del-btn" onclick="removeItem('gallery/${child.key}')">×</button>
+            const item = child.val();
+            list.innerHTML += `
+                <div class="gal-item">
+                    <img src="${item.image}">
+                    <button class="gal-del" onclick="del('gallery/${child.key}')">×</button>
                 </div>`;
         });
     });
 
-    // 3. Legacy Archive Logic
+    // 3. Legacy Archive (Edit/Save)
     function saveDonor() {
         const key = document.getElementById('edit-key').value;
         const data = {
             name: document.getElementById('d-name').value,
             trees: document.getElementById('d-trees').value,
-            photo: document.getElementById('d-photo').value || "https://via.placeholder.com/50",
-            link: "#"
+            photo: document.getElementById('d-photo').value || "https://via.placeholder.com/100",
+            link: document.getElementById('d-link').value || "#"
         };
+        
+        if(!data.name || !data.trees) return alert("Fill name and tree count!");
+
         if(key) db.ref('legacy_archive/' + key).update(data);
         else db.ref('legacy_archive').push(data);
         
-        // Reset inputs
+        // Reset
         document.getElementById('edit-key').value = '';
-        document.getElementById('donor-btn').innerText = "ADD TO ARCHIVE";
-        ['d-name','d-trees','d-photo'].forEach(i => document.getElementById(i).value = '');
+        document.getElementById('save-donor-btn').innerText = "SAVE DONOR TO ARCHIVE";
+        ['d-name','d-trees','d-photo','d-link'].forEach(id => document.getElementById(id).value = '');
     }
 
     db.ref('legacy_archive').on('value', snap => {
-        const body = document.getElementById('donor-tbody');
-        body.innerHTML = '';
+        const tbody = document.getElementById('donor-table-body');
+        tbody.innerHTML = '';
         snap.forEach(child => {
             const d = child.val();
-            body.innerHTML += `<tr>
-                <td><img src="${d.photo}" class="avatar">${d.name}</td>
-                <td>${d.trees}</td>
+            tbody.innerHTML += `<tr>
+                <td><img src="${d.photo}" class="avatar"> <b>${d.name}</b></td>
+                <td>${d.trees} Trees</td>
                 <td>
-                    <button style="background:#ffc107; padding:5px 10px;" onclick="editD('${child.key}','${d.name}','${d.trees}','${d.photo}')">Edit</button>
-                    <button style="background:red; color:white; padding:5px 10px;" onclick="removeItem('legacy_archive/${child.key}')">Del</button>
+                    <button class="btn-edit" onclick="editD('${child.key}','${d.name}','${d.trees}','${d.photo}','${d.link}')">Edit</button>
+                    <button class="btn-delete" onclick="del('legacy_archive/${child.key}')">Del</button>
                 </td>
             </tr>`;
         });
     });
 
-    function editD(k,n,t,p) {
+    function editD(k, n, t, p, l) {
         document.getElementById('d-name').value = n;
         document.getElementById('d-trees').value = t;
         document.getElementById('d-photo').value = p;
+        document.getElementById('d-link').value = l;
         document.getElementById('edit-key').value = k;
-        document.getElementById('donor-btn').innerText = "UPDATE DONOR";
+        document.getElementById('save-donor-btn').innerText = "UPDATE DONOR INFO";
     }
 
-    // 4. Requests Logic
+    // 4. Donation Request Logic
     db.ref('donation_requests').on('value', snap => {
-        const cont = document.getElementById('request-container');
-        cont.innerHTML = '';
-        if(!snap.exists()) cont.innerHTML = "No requests found.";
+        const list = document.getElementById('req-list');
+        list.innerHTML = '';
+        if(!snap.exists()) list.innerHTML = "No pending requests.";
         snap.forEach(child => {
             const r = child.val();
-            cont.innerHTML += `
-            <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;">
+            list.innerHTML += `
+            <div class="req-box">
                 <span><b>${r.name}</b> wants to plant ${r.qty} trees</span>
                 <div>
-                    <button style="background:green; color:white;" onclick="approve('${child.key}','${r.name}','${r.qty}')">Complete</button>
-                    <button style="background:red; color:white;" onclick="removeItem('donation_requests/${child.key}')">X</button>
+                    <button class="btn-approve" onclick="approve('${child.key}','${r.name}','${r.qty}')">Approve</button>
+                    <button class="btn-delete" onclick="del('donation_requests/${child.key}')">Reject</button>
                 </div>
             </div>`;
         });
@@ -206,12 +227,10 @@
     function approve(key, n, q) {
         db.ref('legacy_archive').push({ name: n, trees: q, photo: "", link: "#" });
         db.ref('donation_requests/' + key).remove();
-        alert("Moved to Archive!");
+        alert("Approved and added to Archive!");
     }
 
-    function removeItem(path) {
-        if(confirm("Are you sure?")) db.ref(path).remove();
-    }
+    function del(path) { if(confirm("Confirm Delete?")) db.ref(path).remove(); }
 </script>
 </body>
 </html>
