@@ -146,28 +146,45 @@
         <section class="section" id="philosophy">
             <div class="content-wrap">
                 <h2 style="font-family:'Montserrat'; font-weight:900; font-size:32px;">MISSION PHILOSOPHY & DEFENSE</h2>
+                
+                <div class="info-grid" style="margin-top: 30px;">
+                    <div class="info-card" style="grid-column: 1 / -1; background: #f9f9f9; padding: 30px; border-radius: 15px; border-left: 8px solid var(--pink);">
+                        <h3 style="color: var(--black); font-size: 24px;">The 1 Billion Mission: A Biological Shield for Humanity</h3>
+                        <p style="font-size: 16px; font-weight: 500; color: #333;">Today, the global population has surpassed <strong>8.2 Billion</strong>. Every single soul on this planet depends on the same air, yet our atmosphere is under constant threat from industrial fallout and ecological instability. Protecting the air we breathe is no longer a choice—it is a collective necessity for our survival.</p>
+                        <p style="margin-top: 10px; font-weight: 700; color: var(--pink);">8 Billion People, 1 Billion Trees. Join the mission to protect the air we all breathe.</p>
+                    </div>
+                </div>
+
                 <div class="info-grid">
                     <div class="info-card" style="grid-column: 1 / -1; border-bottom: 3px solid var(--pink); padding-bottom: 20px;">
-                        <h3>Environmental Shield Against War Impacts</h3>
-                        <p>Global conflicts do more than direct damage; they destroy the very air we breathe. Modern warfare releases toxic gases, chemical residues, and massive amounts of dust into the atmosphere. This can lead to environmental disasters like "oily rain" and severe respiratory issues for civilians. </p>
-                        <p>Nature is our only long-term defense. Trees act as massive biological filters, trapping toxic dust and absorbing harmful gases. By planting millions of trees, we are not just reforestation—we are building a natural shield for our children. Preparedness through nature is the only way to counteract the invisible damage of global instability. We must plant today to breathe tomorrow.</p>
+                        <h3>Environmental Shield & Natural Defense</h3>
+                        <p>Global environmental shifts do more than visible damage; they destroy the very air we breathe. Modern industrialization releases toxic gases, chemical residues, and massive amounts of dust into the atmosphere. This can lead to environmental disasters and severe respiratory issues for civilizations.</p>
+                        <p>Nature is our only long-term defense. Trees act as massive biological filters, trapping toxic dust and absorbing harmful gases. By planting millions of trees, we are not just reforestation—we are building a natural shield for our children. Preparedness through nature is the only way to counteract the invisible damage of global ecological instability. We must plant today to breathe tomorrow.</p>
+                    </div>
+
+                    <div class="info-card">
+                        <h3>The Roadmap to 1 Billion</h3>
+                        <p>Our journey begins with a focused, phase-based approach. The first phase of this global revolution is to provide a fruit-bearing tree to every student from primary to secondary levels. By empowering the youth, we are not just planting saplings; we are planting the seeds of environmental responsibility in the hearts of the next generation.</p>
                     </div>
 
                     <div class="info-card">
                         <h3>Our Goal & Priority</h3>
-                        <p>Our primary mission is absolute: to provide every student in Bangladesh from Class 1 to Class 10 with their own fruit-bearing tree. Once we have reached every student across the nation, we will expand our logistics and mission to other countries in need of environmental restoration.</p>
+                        <p>Our primary mission is absolute: to reach every student across the nation with their own fruit-bearing tree. Once we have achieved this milestone, we will expand our logistics and mission to other regions and countries in need of environmental restoration.</p>
                     </div>
+
                     <div class="info-card">
                         <h3>Where Does Your Money Go?</h3>
                         <p>Transparency is our foundation. We have invested zero donor capital into this website or our operations. Every dollar you send is converted directly into a sapling. Our team covers all personal expenses out of pocket.</p>
                     </div>
+
                     <div class="info-card">
-                        <h3>Why Fruit Trees?</h3>
-                        <p>By planting fruit trees, we provide children with a sustainable source of nutrition while restoring the ecosystem. It is a dual-purpose investment in the planet and the next generation of students.</p>
+                        <h3>Why Fruit-Bearing Trees?</h3>
+                        <p>We choose fruit trees to create a dual-purpose legacy: <strong>Sustainable Nutrition</strong> for the youth and <strong>Carbon Sequestration</strong> for the planet. It is a direct investment in human health and ecological balance, providing food security while restoring the ecosystem.</p>
                     </div>
-                    <div class="info-card">
-                        <h3>The Silent Witness</h3>
-                        <p>Every tree is recorded in the ARK ARCHIVE. By claiming a plot, your name is etched into the digital record of this revolution—a testament to your contribution to a cleaner, greener world.</p>
+
+                    <div class="info-card" style="grid-column: 1 / -1;">
+                        <h3>The Silent Witness & Universal Legacy</h3>
+                        <p>Every tree is recorded in the ARK ARCHIVE. By claiming a plot, your name is etched into the digital record of this revolution—a testament to your contribution to a cleaner, greener world. This is a permanent digital and physical record of humanity coming together to ensure we can all breathe tomorrow.</p>
                     </div>
                 </div>
             </div>
@@ -255,7 +272,6 @@
     </div>
 
     <script>
-        // --- Firebase Configuration ---
         const firebaseConfig = {
             apiKey: "AIzaSyCAdnfu2R82xbC7H85n_9mvQBE58X3TjbA",
             authDomain: "the-5k-elite-legacy.firebaseapp.com",
@@ -268,7 +284,6 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // ১. স্ট্যাটাস লোড (Manual Update Sync)
         db.ref('stats').on('value', snapshot => {
             const data = snapshot.val() || { collected: 0, bought: 0, delivered: 0 };
             document.getElementById('stat-donation').innerText = '$' + data.collected;
@@ -276,7 +291,6 @@
             document.getElementById('stat-handed').innerText = data.delivered;
         });
 
-        // ২. গ্যালারি লোড (Clickable Links for Images)
         db.ref('gallery').on('value', snapshot => {
             const gallery = document.getElementById('main-gallery');
             gallery.innerHTML = '';
@@ -307,7 +321,6 @@
             }
         });
 
-        // ৩. লিগ্যাসি গ্রিড (Automatic Update from Admin Approval)
         const grid = document.getElementById('infiniteGrid');
         let currentRealPlots = 0;
 
@@ -352,7 +365,6 @@
 
         window.onload = loadLegacyData;
 
-        // ৪. ইনফিনিট স্ক্রল (ডিজাইন ঠিক রেখে)
         window.addEventListener('scroll', () => {
             if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 800) {
                 addDemoPlots(24);
@@ -363,20 +375,18 @@
         function closeCongrats() { document.getElementById('congrats-popup').classList.remove('active'); }
         function copy(t) { navigator.clipboard.writeText(t).then(() => alert("Copied: " + t)); }
 
-        // ৫. ডোনেশন রিকোয়েস্ট (Updated: Includes Email & Validation)
         function submitDonation() {
             const name = document.getElementById('custName').value;
             const email = document.getElementById('custEmail').value;
             const qty = document.getElementById('treeQty').value;
             
-            // Validation: All three fields must be filled
             if(!name || !email || !qty) {
                 return alert("Please enter donor name, email address, and tree quantity.");
             }
             
             db.ref('donation_requests').push({
                 name: name,
-                email: email, // Sending email to Database
+                email: email, 
                 qty: qty,
                 timestamp: Date.now()
             }).then(() => {
