@@ -3,20 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARK | Manual Data Update</title>
+    <title>ARK | Master Manual Control</title>
     
     <script>
         function checkAccess() {
-            // আপনার দেওয়া নির্দিষ্ট পাসওয়ার্ড
             const pass = "zoomlink34@gmail.com";
-            let enteredPass = prompt("Admin Access Required:");
+            let enteredPass = prompt("Master Admin Password:");
             
             if (enteredPass !== pass) {
-                alert("Access Denied!");
-                document.body.innerHTML = "<div style='text-align:center; margin-top:100px; font-family:sans-serif;'><h1 style='color:red;'>403 - FORBIDDEN</h1><p>You do not have permission to access this manual update tool.</p></div>";
+                alert("Unauthorized!");
+                document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:50px;'>ACCESS DENIED</h1>";
                 window.stop();
             } else {
-                document.getElementById('update-panel').style.display = 'block';
+                document.getElementById('master-panel').style.display = 'block';
             }
         }
     </script>
@@ -25,53 +24,69 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
     <style>
-        :root { --cyan: #00BFFF; --pink: #FF1493; --black: #111; }
-        body { font-family: 'Inter', -apple-system, sans-serif; background: #000; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        :root { --cyan: #00BFFF; --pink: #FF1493; --dark-bg: #0d1117; --card-bg: #161b22; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--dark-bg); color: #c9d1d9; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
         
-        .update-card { background: #1a1a1a; padding: 40px; border-radius: 20px; border: 1px solid #333; width: 90%; max-width: 400px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-        h2 { font-size: 18px; text-transform: uppercase; letter-spacing: 2px; color: var(--cyan); margin-bottom: 30px; text-align: center; border-bottom: 1px solid #333; padding-bottom: 15px; }
+        .card { background: var(--card-bg); padding: 25px; border-radius: 15px; border: 1px solid #30363d; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h2 { color: var(--cyan); font-size: 16px; text-transform: uppercase; margin-top: 0; border-bottom: 1px solid #30363d; padding-bottom: 10px; margin-bottom: 20px; }
         
-        .field { margin-bottom: 20px; }
-        label { display: block; font-size: 11px; text-transform: uppercase; color: #888; margin-bottom: 8px; font-weight: bold; }
-        input { width: 100%; background: #222; border: 1px solid #444; padding: 12px; color: #fff; border-radius: 8px; font-size: 16px; box-sizing: border-box; outline: none; }
-        input:focus { border-color: var(--cyan); }
+        label { display: block; font-size: 12px; margin-bottom: 5px; color: #8b949e; }
+        input { width: 100%; background: #0d1117; border: 1px solid #30363d; padding: 12px; color: #fff; border-radius: 8px; margin-bottom: 15px; box-sizing: border-box; }
+        input:focus { border-color: var(--cyan); outline: none; }
 
-        .btn-push { width: 100%; background: var(--pink); color: #fff; border: none; padding: 15px; border-radius: 8px; font-weight: 900; cursor: pointer; text-transform: uppercase; margin-top: 10px; transition: 0.3s; }
-        .btn-push:hover { transform: scale(1.02); filter: brightness(1.1); }
-        
-        .back-link { display: block; text-align: center; margin-top: 20px; color: #555; text-decoration: none; font-size: 12px; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.3s; margin-top: 5px; }
+        .btn-update { background: var(--cyan); color: #000; }
+        .btn-gallery { background: var(--pink); color: #fff; }
+        .btn:hover { opacity: 0.8; transform: translateY(-2px); }
+
+        .gallery-item { display: flex; align-items: center; justify-content: space-between; background: #0d1117; padding: 10px; border-radius: 8px; margin-bottom: 8px; border: 1px dashed #30363d; }
+        .gallery-item img { width: 50px; height: 40px; object-fit: cover; border-radius: 4px; }
+        .delete-text { color: #f85149; cursor: pointer; font-size: 12px; font-weight: bold; }
     </style>
 </head>
 
 <body onload="checkAccess()">
 
-<div id="update-panel" style="display:none;">
-    <div class="update-card">
-        <h2>Manual Sync Panel</h2>
-        
-        <div class="field">
+<div id="master-panel" style="display:none;">
+    <div class="container">
+        <h1 style="text-align:center; font-size: 22px; color: white;">ARK MASTER CONTROL</h1>
+
+        <div class="card">
+            <h2>1. Manual Stats Update</h2>
             <label>Total Collected ($)</label>
-            <input type="number" id="m-collected" placeholder="Current: $0">
+            <input type="number" id="stat-collected">
+            
+            <label>Trees Bought</label>
+            <input type="number" id="stat-bought">
+            
+            <label>Handed Over</label>
+            <input type="number" id="stat-delivered">
+            
+            <button class="btn btn-update" onclick="updateStats()">Sync Global Stats</button>
         </div>
 
-        <div class="field">
-            <label>Total Trees Bought</label>
-            <input type="number" id="m-bought" placeholder="Current: 0">
+        <div class="card">
+            <h2>2. Mission Progress Gallery</h2>
+            <label>Image URL (ছবি কোথায় হোস্ট করা)</label>
+            <input type="text" id="gal-img-url" placeholder="https://example.com/image.jpg">
+            
+            <label>Redirect Link (ক্লিক করলে যেখানে নিয়ে যাবে)</label>
+            <input type="text" id="gal-redirect-url" placeholder="https://facebook.com/post/123">
+            
+            <button class="btn btn-gallery" onclick="addGalleryItem()">Add to Progress Section</button>
+
+            <div id="gallery-preview" style="margin-top:20px;">
+                <label>Active Images in Progress:</label>
+                </div>
         </div>
 
-        <div class="field">
-            <label>Total Handed Over</label>
-            <input type="number" id="m-delivered" placeholder="Current: 0">
-        </div>
-
-        <button class="btn-push" onclick="pushUpdate()">Push Live Changes</button>
-        
-        <a href="#" onclick="window.history.back()" class="back-link">Return to Dashboard</a>
+        <p style="text-align:center; font-size:10px; color:#444;">ARK ARCHIVE SECURE PROTOCOL v2.0</p>
     </div>
 </div>
 
 <script>
-    // Firebase Configuration (অক্ষত)
+    // Firebase Configuration
     const firebaseConfig = {
         apiKey: "AIzaSyCAdnfu2R82xbC7H85n_9mvQBE58X3TjbA",
         authDomain: "the-5k-elite-legacy.firebaseapp.com",
@@ -84,29 +99,61 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // বর্তমান ডেটা লোড করা হচ্ছে যাতে এডিট করা সহজ হয়
+    // Stats Sync
     db.ref('stats').on('value', snap => {
-        const data = snap.val() || { collected: 0, bought: 0, delivered: 0 };
-        document.getElementById('m-collected').value = data.collected;
-        document.getElementById('m-bought').value = data.bought;
-        document.getElementById('m-delivered').value = data.delivered;
+        const d = snap.val() || { collected: 0, bought: 0, delivered: 0 };
+        document.getElementById('stat-collected').value = d.collected;
+        document.getElementById('stat-bought').value = d.bought;
+        document.getElementById('stat-delivered').value = d.delivered;
     });
 
-    function pushUpdate() {
-        const c = document.getElementById('m-collected').value;
-        const b = document.getElementById('m-bought').value;
-        const d = document.getElementById('m-delivered').value;
+    function updateStats() {
+        db.ref('stats').set({
+            collected: parseInt(document.getElementById('stat-collected').value) || 0,
+            bought: parseInt(document.getElementById('stat-bought').value) || 0,
+            delivered: parseInt(document.getElementById('stat-delivered').value) || 0
+        }).then(() => alert("Stats Updated!"));
+    }
 
-        if(confirm("Confirm Manual Overwrite? This will update the main website immediately.")) {
-            db.ref('stats').set({
-                collected: parseInt(c) || 0,
-                bought: parseInt(b) || 0,
-                delivered: parseInt(d) || 0
+    // Gallery with Link Logic
+    function addGalleryItem() {
+        const img = document.getElementById('gal-img-url').value;
+        const link = document.getElementById('gal-redirect-url').value;
+
+        if(img && link) {
+            db.ref('mission_progress').push({
+                image: img,
+                url: link
             }).then(() => {
-                alert("Database Synchronized!");
-            }).catch(err => {
-                alert("Error: " + err.message);
+                alert("Progress Image Linked Successfully!");
+                document.getElementById('gal-img-url').value = '';
+                document.getElementById('gal-redirect-url').value = '';
             });
+        } else {
+            alert("Please fill both fields!");
+        }
+    }
+
+    db.ref('mission_progress').on('value', snap => {
+        const preview = document.getElementById('gallery-preview');
+        preview.innerHTML = '<label>Active Images in Progress:</label>';
+        snap.forEach(child => {
+            const data = child.val();
+            preview.innerHTML += `
+                <div class="gallery-item">
+                    <img src="${data.image}">
+                    <div style="flex:1; margin-left:10px; font-size:10px; overflow:hidden;">
+                        Link: ${data.url}
+                    </div>
+                    <span class="delete-text" onclick="deleteItem('${child.key}')">REMOVE</span>
+                </div>
+            `;
+        });
+    });
+
+    function deleteItem(key) {
+        if(confirm("Remove this progress update?")) {
+            db.ref('mission_progress/' + key).remove();
         }
     }
 </script>
