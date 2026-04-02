@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARK ARCHIVE | Global Green Billboard & Legacy</title>
+    <title>ARK ARCHIVE | Digital Billboard & Green Legacy</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
@@ -20,6 +20,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
         body { background: var(--white); color: var(--black); font-family: 'Inter', sans-serif; overflow-x: hidden; }
 
+        /* Navigation */
         .nav-bar { width: 100%; max-width: 1200px; height: 100px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; margin: 0 auto; }
         .nav-brand { font-family: 'Montserrat'; font-weight: 900; font-size: 24px; letter-spacing: 1px; flex-shrink: 0; }
         
@@ -32,7 +33,7 @@
         .nav-link { text-decoration: none; color: var(--black); font-weight: 700; font-size: 13px; text-transform: uppercase; font-family: 'Montserrat'; }
         .donate-btn { background: var(--pink); color: #fff; padding: 12px 30px; border-radius: 50px; text-decoration: none; font-weight: 900; font-size: 13px; text-transform: uppercase; cursor: pointer; border: none; }
 
-        /* Updated Social Bar */
+        /* Floating Contact Bar */
         .fixed-social-bar {
             position: fixed; right: 20px; bottom: 30px;
             display: flex; flex-direction: column; gap: 10px; z-index: 9999;
@@ -43,33 +44,24 @@
             display: flex; align-items: center; justify-content: center; color: #fff;
             text-decoration: none; font-size: 18px; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
-        .support-label { font-size: 9px; font-weight: 900; color: var(--pink); text-transform: uppercase; margin-top: -5px; margin-bottom: 5px; text-align: center; line-height: 1; }
+        .support-label { font-size: 9px; font-weight: 900; color: var(--pink); text-transform: uppercase; margin-bottom: 5px; text-align: center; line-height: 1; }
         .side-icon:hover { transform: scale(1.1); background: var(--black); }
 
+        /* Sections */
         .section { width: 100%; display: flex; flex-direction: column; align-items: center; padding: 100px 20px; text-align: center; }
 
-        #hero { background: var(--cyan); color: #fff; }
-        .hero-title { font-family: 'Montserrat'; font-weight: 900; font-size: clamp(35px, 7vw, 70px); text-transform: uppercase; margin-bottom: 20px; }
-        .hero-desc { max-width: 900px; font-size: 20px; line-height: 1.6; opacity: 0.9; margin-bottom: 40px; }
+        #hero { background: var(--cyan); color: #fff; padding: 120px 20px; }
+        .hero-title { font-family: 'Montserrat'; font-weight: 900; font-size: clamp(30px, 6vw, 60px); text-transform: uppercase; margin-bottom: 20px; line-height: 1.1; }
+        .hero-desc { max-width: 900px; font-size: 18px; line-height: 1.6; opacity: 0.9; margin-bottom: 40px; }
 
-        /* Legacy Pricing Style */
-        .legacy-card {
-            background: #fff; border: 4px solid var(--cyan); border-radius: 20px;
-            padding: 40px; max-width: 1000px; margin-top: 40px; text-align: left;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-        }
-        .legacy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px; }
-        @media (max-width: 768px) { .legacy-grid { grid-template-columns: 1fr; } }
-        .price-box { background: var(--grey); padding: 20px; border-radius: 12px; }
-        .price-tag { font-family: 'Montserrat'; font-weight: 900; font-size: 30px; color: var(--pink); }
-
-        #philosophy { background: var(--white); text-align: left; }
+        /* Info Grid */
         .content-wrap { max-width: 1100px; width: 100%; }
-        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 40px; margin-top: 50px; }
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 40px; margin-top: 50px; text-align: left; }
         @media (max-width: 768px) { .info-grid { grid-template-columns: 1fr; } .nav-stats { display: none; } }
         .info-card h3 { font-family: 'Montserrat'; font-weight: 900; color: var(--cyan); margin-bottom: 15px; text-transform: uppercase; }
         .info-card p { line-height: 1.8; color: #444; font-size: 15px; margin-bottom: 10px; }
 
+        /* Billboard Styling */
         #archive { 
             background: linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.9)), url('https://images.unsplash.com/photo-1542601906990-b4d3fb773b09?auto=format&fit=crop&q=80&w=2000');
             background-size: cover; background-attachment: fixed; color: #fff; width: 100%; padding: 100px 0;
@@ -78,17 +70,19 @@
         @media (max-width: 1200px) { .donor-grid { grid-template-columns: repeat(6, 1fr); } }
         @media (max-width: 768px) { .donor-grid { grid-template-columns: repeat(3, 1fr); } }
         
-        .donor-container { text-align: center; }
-        .donor-circle { width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--cyan); margin: 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); transition: 0.3s; overflow: hidden;}
+        .donor-container { text-align: center; transition: 0.3s; }
+        .donor-circle { width: 90px; height: 90px; border-radius: 50%; border: 2px solid var(--cyan); margin: 0 auto; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.1); backdrop-filter: blur(5px); transition: 0.3s; overflow: hidden; position: relative;}
         .donor-circle img { width: 100%; height: 100%; object-fit: cover; }
-        .donor-circle:hover { border-color: var(--pink); transform: scale(1.1); box-shadow: 0 0 20px var(--pink); }
-        .donor-name { display: block; font-size: 11px; margin-top: 8px; font-weight: 900; text-transform: uppercase; color: var(--white); line-height: 1.2; }
+        .donor-circle:hover { border-color: var(--pink); transform: scale(1.1) rotate(5deg); }
+        .donor-name { display: block; font-size: 10px; margin-top: 8px; font-weight: 900; text-transform: uppercase; color: var(--white); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 
-        #payment-drawer { position: fixed; top: 0; right: -100%; width: 450px; height: 100vh; background: #fff; border-left: 5px solid var(--pink); z-index: 5000; padding: 60px 40px; transition: 0.5s; overflow-y: auto; color: #000; }
+        /* Drawer & Popup */
+        #payment-drawer { position: fixed; top: 0; right: -100%; width: 450px; height: 100vh; background: #fff; border-left: 5px solid var(--cyan); z-index: 5000; padding: 60px 40px; transition: 0.5s; overflow-y: auto; color: #000; }
         #payment-drawer.open { right: 0; }
-        .pay-input { width: 100%; padding: 15px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-family: 'Inter'; }
-        .pay-card { background: var(--grey); padding: 20px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #eee; cursor: pointer; }
-        .limit-tag { display: inline-block; padding: 4px 10px; background: var(--black); color: var(--cyan); font-size: 10px; font-weight: 900; border-radius: 4px; margin-top: 8px; text-transform: uppercase; }
+        .pay-input { width: 100%; padding: 15px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-weight: 600; }
+        .price-notice { background: #f0faff; padding: 15px; border-radius: 8px; font-size: 13px; margin-bottom: 20px; border-left: 4px solid var(--cyan); }
+        .pay-card { background: var(--grey); padding: 20px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #eee; cursor: pointer; transition: 0.2s; }
+        .pay-card:hover { border-color: var(--pink); }
 
         #congrats-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8); background: #fff; color: #000; padding: 40px; border-radius: 20px; z-index: 6000; text-align: center; display: none; width: 90%; max-width: 550px; box-shadow: 0 0 100px rgba(0,0,0,0.5); }
         #congrats-popup.active { display: block; transform: translate(-50%, -50%) scale(1); }
@@ -97,9 +91,8 @@
 <body>
 
     <div class="fixed-social-bar">
-        <a href="https://wa.me/8801576940717" target="_blank" class="side-icon" title="Customer Support"><i class="fab fa-whatsapp"></i></a>
-        <span class="support-label">Customer Support<br>24/7</span>
-        
+        <span class="support-label">Support</span>
+        <a href="https://wa.me/8801576940717" target="_blank" class="side-icon" title="WhatsApp Support"><i class="fab fa-whatsapp"></i></a>
         <a href="https://www.facebook.com/DevKawsarAhmed" target="_blank" class="side-icon" title="Founder Facebook"><i class="fab fa-facebook-f"></i></a>
         <a href="mailto:arkarchiveofficial@gmail.com" class="side-icon" title="Email Support"><i class="fas fa-envelope"></i></a>
     </div>
@@ -107,61 +100,60 @@
     <div class="main-wrapper">
         <header class="nav-bar">
             <div class="nav-brand">ARK ARCHIVE</div>
-            
             <div class="nav-stats">
-                <div class="stat-item"><span class="stat-number" id="stat-donation">$0</span><span class="stat-text">Collected</span></div>
-                <div class="stat-item"><span class="stat-number" id="stat-bought">0</span><span class="stat-text">Trees Bought</span></div>
-                <div class="stat-item"><span class="stat-number" id="stat-handed">0</span><span class="stat-text">Handed Over</span></div>
+                <div class="stat-item">
+                    <span class="stat-number" id="stat-donation">$0</span>
+                    <span class="stat-text">Funds</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="stat-bought">0</span>
+                    <span class="stat-text">Plots Taken</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="stat-handed">0</span>
+                    <span class="stat-text">Trees Planted</span>
+                </div>
             </div>
-
             <nav class="nav-links">
-                <a href="#philosophy" class="nav-link">Philosophy</a>
-                <a href="#archive" class="nav-link">Global Billboard</a>
-                <button onclick="toggleDrawer()" class="donate-btn">Join Mission</button>
+                <a href="#philosophy" class="nav-link">Mission</a>
+                <a href="#archive" class="nav-link">Billboard</a>
+                <button onclick="toggleDrawer()" class="donate-btn">Get A Slot</button>
             </nav>
         </header>
 
         <section class="section" id="hero">
-            <h1 class="hero-title">1 BILLION FRUIT TREES MISSION</h1>
-            <p class="hero-desc">Building a Biological Shield for the next generation. Secure your place in history and protect the air we breathe.</p>
-            <button onclick="toggleDrawer()" class="donate-btn" style="padding: 20px 50px; font-size: 16px; background: #000;">CLAIM YOUR SLOT & PLANT TREES</button>
-        </section>
-
-        <section class="section" id="legacy-billboard">
-            <div class="legacy-card">
-                <h2 style="font-family:'Montserrat'; font-weight:900; color:var(--black); margin-bottom:10px;">THE GREEN BILLBOARD LEGACY</h2>
-                <p style="color:#666; margin-bottom:20px;">Combine business growth with environmental impact. Secure a permanent spot on our global billboard while funding trees for students.</p>
-                
-                <div class="legacy-grid">
-                    <div class="price-box">
-                        <span class="price-tag">$20</span>
-                        <h4 style="margin:10px 0;">Permanent Circular Slot</h4>
-                        <p style="font-size:14px; color:#555;">Place your Logo/Photo and Website Link forever in our Legacy Archive. No renewal fees. Ever.</p>
-                    </div>
-                    <div class="price-box">
-                        <span class="price-tag">$1 <small>/Tree</small></span>
-                        <h4 style="margin:10px 0;">Tree Donation (Optional)</h4>
-                        <p style="font-size:14px; color:#555;">Gift a fruit tree to a student. Each dollar plants one tree and empowers one child to protect our air.</p>
-                    </div>
-                </div>
+            <h1 class="hero-title">Your Eternal Legacy on a Digital Billboard</h1>
+            <p class="hero-desc">Secure a permanent spot for $20 and help us plant 1 Billion trees. Your brand, your name, or your memory—etched into our green history forever.</p>
+            <div style="display:flex; gap:15px; flex-wrap:wrap; justify-content:center;">
+                <button onclick="toggleDrawer()" class="donate-btn" style="padding: 20px 40px; font-size: 16px; background: #000;">Claim Slot ($20)</button>
+                <button onclick="toggleDrawer()" class="donate-btn" style="padding: 20px 40px; font-size: 16px; background: var(--pink);">Donate $1/Tree</button>
             </div>
         </section>
 
         <section class="section" id="philosophy">
             <div class="content-wrap">
-                <h2 style="font-family:'Montserrat'; font-weight:900; font-size:32px;">MISSION PHILOSOPHY & DEFENSE</h2>
+                <h2 style="font-family:'Montserrat'; font-weight:900; font-size:32px; text-transform:uppercase;">Vision & Global Impact</h2>
+                
                 <div class="info-grid">
                     <div class="info-card" style="grid-column: 1 / -1; background: #f9f9f9; padding: 30px; border-radius: 15px; border-left: 8px solid var(--pink);">
-                        <h3 style="color: var(--black); font-size: 24px;">A Biological Shield for Humanity</h3>
-                        <p>With 8.2 Billion people on Earth, protecting our shared air is a necessity. Our mission provides a fruit-bearing tree to every student, building a natural defense against industrial toxins and dust.</p>
+                        <h3 style="color: var(--black); font-size: 24px;">The 1 Billion Mission: A Biological Shield</h3>
+                        <p>With a global population over 8.2 Billion, protecting our shared air is a collective necessity. ARK ARCHIVE is building a natural defense system by planting 1 Billion fruit-bearing trees through the hands of young students.</p>
+                        <p style="font-weight: 700; color: var(--pink);">Secure your plot today. 100% of tree donations go directly to the ground.</p>
                     </div>
+
                     <div class="info-card">
-                        <h3>Zero Donor Capital Policy</h3>
-                        <p>Transparency is our foundation. 100% of your tree donations go directly into buying saplings. Our team covers all website and operational costs out of pocket.</p>
+                        <h3>Natural Defense</h3>
+                        <p>Trees act as biological filters, trapping toxic dust and absorbing harmful gases. We are building a natural shield for our children to counteract ecological instability.</p>
                     </div>
+
                     <div class="info-card">
-                        <h3>Why Fruit Trees?</h3>
-                        <p>We choose fruit trees for sustainable nutrition and carbon sequestration. It's an investment in both human health and the planet's ecological balance.</p>
+                        <h3>Our Dual-Purpose Legacy</h3>
+                        <p>We choose fruit trees to provide <strong>Sustainable Nutrition</strong> for students and <strong>Carbon Sequestration</strong> for the planet. It's an investment in health and air.</p>
+                    </div>
+
+                    <div class="info-card" style="grid-column: 1 / -1; border-top: 2px solid #eee; padding-top: 30px;">
+                        <h3>The Digital Billboard Concept</h3>
+                        <p>For a one-time fee of <strong>$20</strong>, you can claim a permanent circular slot in our Archive. Link your business, social media, or personal portfolio. This is a lifetime advertisement that also funds the infrastructure of our 1 Billion Tree mission. No renewals, ever.</p>
                     </div>
                 </div>
             </div>
@@ -169,57 +161,64 @@
 
         <section id="archive">
             <div class="section">
-                <h2 style="font-family:'Montserrat'; font-weight:900; font-size:40px; text-transform:uppercase; color:var(--cyan);">The Global Green Billboard</h2>
-                <p style="color:rgba(255,255,255,0.7); margin-bottom:30px;">Every circle represents a visionary leader who supported our 1 Billion Trees Mission.</p>
+                <h2 style="font-family:'Montserrat'; font-weight:900; font-size:40px; text-transform:uppercase; color:var(--cyan); margin-bottom: 10px;">The Green Billboard</h2>
+                <p style="margin-bottom: 50px; opacity: 0.8;">A permanent record of those who stand for a greener future.</p>
                 <div class="donor-grid" id="infiniteGrid"></div>
                 <div id="grid-bottom" style="height: 100px;"></div>
             </div>
         </section>
     </div>
 
-    <div id="congrats-popup">
-        <h2 id="congrats-title" style="color:var(--pink); font-family:'Montserrat';"></h2>
-        <p id="congrats-desc" style="margin:20px 0; font-weight:bold;"></p>
-        <div style="text-align:left; background:#f9f9f9; padding:20px; border-radius:10px; font-size:14px; line-height:1.6; border-left:5px solid var(--cyan);">
-            <strong>Next Steps:</strong><br>
-            1. Complete your payment (Slot $20 + Your Tree Donation).<br>
-            2. Contact <strong>WhatsApp Support</strong> or email <strong>arkarchiveofficial@gmail.com</strong>.<br>
-            3. Provide your <strong>Logo/Photo and Website Link</strong> to go live on the billboard.
-        </div>
-        <button onclick="closeCongrats()" class="donate-btn" style="margin-top:25px; width:100%;">I UNDERSTAND</button>
-    </div>
-
     <div id="payment-drawer">
         <h2 style="font-family:'Montserrat'; margin-bottom:10px;">SECURE YOUR LEGACY</h2>
-        <p style="font-size:13px; color:#666; margin-bottom:20px;">Billboard Slot: <strong>$20 (Fixed)</strong> + Tree Donation: <strong>$1/Tree</strong></p>
-        
-        <input type="text" id="custName" class="pay-input" placeholder="FULL NAME / BRAND NAME">
+        <div class="price-notice">
+            <strong>Standard Pricing:</strong><br>
+            • Permanent Slot: <strong>$20 (One-time)</strong><br>
+            • Student Tree Gift: <strong>$1 per Tree (Optional)</strong>
+        </div>
+
+        <input type="text" id="custName" class="pay-input" placeholder="YOUR FULL NAME / BRAND">
         <input type="email" id="custEmail" class="pay-input" placeholder="EMAIL ADDRESS">
-        <input type="url" id="custLink" class="pay-input" placeholder="WEBSITE / SOCIAL LINK (http://...)">
-        <input type="number" id="treeQty" class="pay-input" placeholder="NUMBER OF TREES TO DONATE">
+        <input type="number" id="treeQty" class="pay-input" placeholder="ADDITIONAL TREES TO GIFT (Optional)">
         
-        <button onclick="submitDonation()" style="width:100%; padding:18px; background:var(--pink); color:#fff; border:none; border-radius:8px; font-weight:900; cursor:pointer;">SUBMIT & GET ADDRESS</button>
+        <button onclick="submitDonation()" style="width:100%; padding:18px; background:var(--pink); color:#fff; border:none; border-radius:8px; font-weight:900; cursor:pointer; text-transform:uppercase;">Proceed to Payment</button>
 
         <div id="payment-list" style="display:none; margin-top:30px;">
-            <p style="font-size:11px; font-weight:900; color:var(--cyan); margin-bottom:15px; letter-spacing:1px;">TAP ADDRESS TO COPY</p>
+            <p style="font-size:11px; font-weight:900; color:var(--cyan); margin-bottom:15px; letter-spacing:1px;">SELECT PAYMENT METHOD</p>
             
             <div class="pay-card" onclick="copy('TTapBkTqrDnzHbWzek6wSBUTcJKFmR8Ws6')">
-                <h4 style="font-size:11px;">USDT (TRC20): TTapBkTqrDnzHbWzek6wSBUTcJKFmR8Ws6</h4>
-                <span class="limit-tag" style="background:var(--cyan); color:#000;">Global Preferred</span>
+                <h4 style="font-size:12px;">USDT (TRC20): TTapBkTqrDnzHbWzek6wSBUTcJKFmR8Ws6</h4>
+                <span style="font-size:10px; color:var(--cyan); font-weight:900;">BEST FOR GLOBAL USERS</span>
             </div>
+            
             <div class="pay-card" onclick="copy('912221034')">
                 <h4>Binance UID: 912221034</h4>
-                <span class="limit-tag">Instant / Zero Fees</span>
+                <span style="font-size:10px; color:var(--cyan); font-weight:900;">ZERO FEES</span>
             </div>
+
             <div class="pay-card" onclick="copy('01756206213')">
                 <h4>bKash (Personal): 01756206213</h4>
-                <span class="limit-tag">BD Remittance</span>
+                <span style="font-size:10px; color:var(--pink); font-weight:900;">FOR LOCAL USERS</span>
             </div>
         </div>
         <button onclick="toggleDrawer()" style="margin-top:30px; background:none; border:none; color:#aaa; cursor:pointer;">[ CLOSE PANEL ]</button>
     </div>
 
+    <div id="congrats-popup">
+        <h2 id="congrats-title" style="color:var(--pink); font-family:'Montserrat';"></h2>
+        <p id="congrats-desc" style="margin:20px 0; font-weight:bold;"></p>
+        <div style="text-align:left; background:#f9f9f9; padding:20px; border-radius:10px; font-size:14px; line-height:1.6; border-left:5px solid var(--cyan);">
+            <strong>Final Steps:</strong><br>
+            1. Complete payment ($20 for Slot + optional trees).<br>
+            2. Send your <strong>Name, Logo/Photo, and Website Link</strong> to our Support.<br>
+            3. Our team will live your slot within 24 hours.
+        </div>
+        <a href="https://wa.me/8801576940717" target="_blank" class="donate-btn" style="margin-top:25px; display:block; text-align:center; text-decoration:none;">CONTACT SUPPORT TO ACTIVATE</a>
+        <button onclick="closeCongrats()" style="margin-top:15px; background:none; border:none; color:#999; cursor:pointer;">Close</button>
+    </div>
+
     <script>
+        // Firebase Config (Keep your existing config)
         const firebaseConfig = {
             apiKey: "AIzaSyCAdnfu2R82xbC7H85n_9mvQBE58X3TjbA",
             authDomain: "the-5k-elite-legacy.firebaseapp.com",
@@ -236,21 +235,25 @@
         db.ref('stats').on('value', snapshot => {
             const data = snapshot.val() || { collected: 0, bought: 0, delivered: 0 };
             document.getElementById('stat-donation').innerText = '$' + data.collected;
-            document.getElementById('stat-bought').innerText = data.bought;
-            document.getElementById('stat-handed').innerText = data.delivered;
+            document.getElementById('stat-bought').innerText = data.bought; // Will show occupied slots
+            document.getElementById('stat-handed').innerText = data.delivered; // Trees planted
         });
 
-        // Grid Logic
+        // Load Billboard Data
         const grid = document.getElementById('infiniteGrid');
+        let currentRealPlots = 0;
+
         function loadLegacyData() {
             db.ref('legacy_archive').on('value', snapshot => {
                 grid.innerHTML = '';
+                currentRealPlots = 0;
                 if(snapshot.exists()) {
                     snapshot.forEach(child => {
                         const d = child.val();
+                        currentRealPlots++;
                         grid.innerHTML += `
                         <div class="donor-container">
-                            <a href="${d.link || '#'}" target="_blank">
+                            <a href="${d.link || '#'}" target="_blank" style="text-decoration:none;">
                                 <div class="donor-circle">
                                     <img src="${d.photo || 'https://via.placeholder.com/100'}" onerror="this.src='https://via.placeholder.com/100'">
                                 </div>
@@ -259,34 +262,48 @@
                         </div>`;
                     });
                 }
-                for(let i=0; i<40; i++) {
-                    grid.innerHTML += `<div class="donor-container"><div class="donor-circle" style="opacity:0.1;"><i class="fas fa-tree"></i></div></div>`;
-                }
+                addDemoPlots(120); 
             });
+        }
+
+        function addDemoPlots(count) {
+            let totalShow = currentRealPlots;
+            for(let i=0; i<count; i++) {
+                totalShow++;
+                grid.innerHTML += `
+                <div class="donor-container">
+                    <div class="donor-circle" style="opacity:0.2;">
+                        <i class="fas fa-plus" style="font-size:14px; color:#fff;"></i>
+                    </div>
+                    <span class="donor-name" style="opacity:0.2;">Available</span>
+                </div>`;
+            }
         }
 
         window.onload = loadLegacyData;
 
+        // Interaction Functions
         function toggleDrawer() { document.getElementById('payment-drawer').classList.toggle('open'); }
         function closeCongrats() { document.getElementById('congrats-popup').classList.remove('active'); }
-        function copy(t) { navigator.clipboard.writeText(t).then(() => alert("Copied: " + t)); }
+        function copy(t) { navigator.clipboard.writeText(t).then(() => alert("Address Copied!")); }
 
         function submitDonation() {
             const name = document.getElementById('custName').value;
             const email = document.getElementById('custEmail').value;
-            const link = document.getElementById('custLink').value;
             const qty = document.getElementById('treeQty').value || 0;
             
-            if(!name || !email) return alert("Please enter your name and email.");
+            if(!name || !email) return alert("Name and Email are required to secure a slot.");
             
             db.ref('donation_requests').push({
-                name: name, email: email, website: link, tree_donation: qty,
-                type: "Billboard Slot + Trees",
+                name: name,
+                email: email, 
+                additional_trees: qty,
+                type: "Billboard_Slot",
                 timestamp: Date.now()
             }).then(() => {
                 document.getElementById('payment-list').style.display = 'block';
-                document.getElementById('congrats-title').innerText = "Almost there, " + name + "!";
-                document.getElementById('congrats-desc').innerText = "Billboard Slot ($20) + " + qty + " Trees requested.";
+                document.getElementById('congrats-title').innerText = "Almost There!";
+                document.getElementById('congrats-desc').innerText = "You have requested 1 Slot ($20) + " + qty + " extra trees.";
                 document.getElementById('congrats-popup').classList.add('active');
                 confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
             });
